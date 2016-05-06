@@ -32,6 +32,12 @@ namespace Froq\Service;
 interface ServiceInterface
 {
     /**
+     * Namespace.
+     * @const string
+     */
+    const NAMESPACE             = 'Froq\\App\\Service\\';
+
+    /**
      * Service protocols.
      * @const string
      */
@@ -42,17 +48,17 @@ interface ServiceInterface
      * Service names, suffix.
      * @const string
      */
-    const SERVICE_NAME_SUFFIX  = 'Service',
-          SERVICE_MAIN         = 'MainService',
-          SERVICE_FAIL         = 'FailService';
+    const SERVICE_NAME_SUFFIX   = 'Service',
+          SERVICE_MAIN          = 'MainService',
+          SERVICE_FAIL          = 'FailService';
 
     /**
      * Service method names, prefix.
      * @const string
      */
-    const METHOD_NAME_PREFIX   = 'do',
-          METHOD_INIT          = 'init',
-          METHOD_MAIN          = 'main',
-          METHOD_ONBEFORE      = 'onBefore',
-          METHOD_ONAFTER       = 'onAfter';
+    const METHOD_NAME_PREFIX    = 'do',
+          METHOD_INIT           = 'init',
+          METHOD_MAIN           = 'main',
+          METHOD_ONBEFORE       = 'onBefore',
+          METHOD_ONAFTER        = 'onAfter';
 }
