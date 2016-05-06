@@ -1,200 +1,114 @@
 <?php
-/**
- * Copyright (c) 2016 Kerem Güneş
- *     <k-gun@mail.com>
- *
- * GNU General Public License v3.0
- *     <http://www.gnu.org/licenses/gpl-3.0.txt>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
 declare(strict_types=1);
-
 namespace Froq\Service;
-
 use Froq\App;
 
-/**
- * @package    Froq
- * @subpackage Froq\Service
- * @object     Froq\Service\ServiceAdapter
- * @author     Kerem Güneş <k-gun@mail.com>
- */
 final class ServiceAdapter
 {
-    /**
-     * Froq object.
-     * @var Froq\App
-     */
-    private $app;
-
-    /**
-     * Service object.
-     * @var Froq\Service\Service
-     */
     private $service;
-
-    /**
-     * Service name.
-     * @var string
-     */
     private $serviceName;
-
-    /**
-     * Service default name.
-     * @var string
-     */
-    private $serviceNameDefault = ServiceInterface::SERVICE_MAIN;
-
-    /**
-     * Service method.
-     * @var string
-     */
     private $serviceMethod;
-
-    /**
-     * Service default method.
-     * @var string
-     */
-    private $serviceMethodDefault = ServiceInterface::METHOD_MAIN;
-
-    /**
-     * Service method args.
-     * @var array
-     */
     private $serviceMethodArgs = [];
-
-    /**
-     * Service file.
-     * @var string
-     */
     private $serviceFile;
+    private $serviceClass;
 
-    /**
-     * Constructor.
-     * @param Froq\App $app
-     */
     final public function __construct(App $app)
     {
         $this->app = $app;
 
         // detect service name
         $this->serviceName = ($serviceName = $this->app->request->uri->segment(0))
-            ? $this->toServiceName($serviceName) : $this->serviceNameDefault;
+            ? $this->toServiceName($serviceName) : ServiceInterface::SERVICE_MAIN;
+        // check alias
+        $aliases = $this->app->config['app.service.aliases'];
+        if (array_key_exists($this->serviceName, $aliases)) {
+            $this->serviceName = $aliases[$this->serviceName];
+        }
 
-        // detect service file
         $this->serviceFile = $this->toServiceFile($this->serviceName);
+        $this->serviceClass = $this->toServiceClass($this->serviceName);
 
         // set service as FailService
         if (!$this->isServiceExists()) {
-            // set fail stuff that usable in FailService or anywhere
             set_global('app.service.view.fail', [
                 'code' => 404,
-                'text' => sprintf('Service not found [%s]', $this->serviceName)
+                'text' => sprintf('Service not found [%s]', $this->serviceName),
             ]);
 
-            $this->serviceName = ServiceInterface::SERVICE_FAIL;
+            $this->serviceName   = ServiceInterface::SERVICE_FAIL;
             $this->serviceMethod = ServiceInterface::METHOD_MAIN;
-            $this->serviceFile = $this->toServiceFile($this->serviceName, true);
+            $this->serviceFile   = $this->toServiceFile($this->serviceName);
+            $this->serviceClass  = $this->toServiceClass($this->serviceName);
         }
 
-        // create service
         $this->service = $this->createService();
 
-        // detect service method
-        if ($this->service->useMainOnly) {
-            // main only
-            $this->serviceMethod = ServiceInterface::METHOD_MAIN;
-        } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_SITE) {
-            // from segment
-            $this->serviceMethod = ($serviceMethod = $this->app->request->uri->segment(1, ''))
-                ? $this->toServiceMethod($serviceMethod) : $this->serviceMethodDefault;
-        } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_REST) {
-            // from request method
-            $this->serviceMethod = strtolower($this->app->request->method);
-        }
-
-        // set service as FailService
-        if (!$this->isServiceFail() && !$this->isServiceMethodExists()) {
-            // set fail stuff that usable in FailService or anywhere
-            set_global('app.service.view.fail', [
-                'code' => 404,
-                'text' => sprintf('Service method not found [%s::%s()]',
-                    $this->serviceName, $this->serviceMethod)
-            ]);
-
-            // overwrite
-            $this->serviceName = ServiceInterface::SERVICE_FAIL;
-            $this->serviceMethod = ServiceInterface::METHOD_MAIN;
-            $this->serviceFile = $this->toServiceFile($this->serviceName, true);
-
-            // re-create service as FailService
-            $this->service = $this->createService();
-        }
-
-        // re-set service method & method args
-        $this->service->setMethod($this->serviceMethod);
-
-        if ($this->isServiceExists() && $this->isServiceMethodExists()) {
-            $methodArgs = array_slice($this->app->request->uri->segments(), 2);
-            $methodArgsCount = count($methodArgs);
-            $methodArgsCountRef = (new \ReflectionMethod($this->serviceName, $this->serviceMethod))
-                ->getNumberOfParameters();
-            if ($methodArgsCount < $methodArgsCountRef) {
-                $methodArgs += array_fill($methodArgsCount, $methodArgsCountRef - $methodArgsCount, null);
+        if (!$this->service->isFailService()) {
+            // detect service method
+            if ($this->service->useMainOnly) {
+                // main only
+                $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+            } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_SITE) {
+                // from segment
+                $this->serviceMethod = ($serviceMethod = $this->app->request->uri->segment(1))
+                    ? $this->toServiceMethod($serviceMethod) : ServiceInterface::METHOD_MAIN;
+            } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_REST) {
+                // from request method
+                $this->serviceMethod = strtolower($this->app->request->method);
             }
 
-            $this->service->setMethodArgs($this->serviceMethodArgs = $methodArgs);
+            // check method
+            if (!$this->isServiceMethodExists()) {
+                set_global('app.service.view.fail', [
+                    'code' => 404,
+                    'text' => sprintf('Service method not found [%s::%s()]',
+                        $this->serviceName, $this->serviceMethod)
+                ]);
+
+                // overwrite
+                $this->serviceName   = ServiceInterface::SERVICE_FAIL;
+                $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+                $this->serviceFile   = $this->toServiceFile($this->serviceName);
+                $this->serviceClass  = $this->toServiceClass($this->serviceName);
+
+                // re-create service as FailService
+                $this->service = $this->createService();
+            }
+
+            // set service method
+            $this->service->setMethod($this->serviceMethod);
+
+            // set service method args
+            if ($this->isServiceMethodExists()) {
+                $methodArgs = array_slice($this->app->request->uri->segments(), 2);
+                $methodArgsCount = count($methodArgs);
+                $methodArgsCountRef = (new \ReflectionMethod($this->serviceClass, $this->serviceMethod))
+                    ->getNumberOfParameters();
+                if ($methodArgsCount < $methodArgsCountRef) {
+                    $methodArgs += array_fill($methodArgsCount, $methodArgsCountRef - $methodArgsCount, null);
+                }
+
+                $this->service->setMethodArgs($this->methodArgs = $methodArgs);
+            }
         }
     }
 
-    /**
-     * Check service is FailService.
-     *
-     * @return bool
-     */
-    final public function isServiceFail(): bool
-    {
-        return ($this->serviceName == ServiceInterface::SERVICE_FAIL);
-    }
-
-    /**
-     * Cehck service is exists.
-     *
-     * @return bool
-     */
     final public function isServiceExists(): bool
     {
-        // check file first
         if (!is_file($this->serviceFile)) {
             return false;
         }
-
-        // bypass autoload
-        require_once($this->serviceFile);
-
-        return class_exists($this->serviceName, false);
+        return class_exists($this->serviceClass, true);
     }
-
-    /**
-     * Cehck service method is exists.
-     *
-     * @return bool
-     */
     final public function isServiceMethodExists(): bool
     {
         return ($this->service && method_exists($this->service, $this->serviceMethod));
+    }
+
+    final public function createService(): ServiceInterface
+    {
+        return new $this->serviceClass($this->app,
+            $this->serviceName, $this->serviceMethod, $this->serviceMethodArgs);
     }
 
     /**
@@ -237,54 +151,22 @@ final class ServiceAdapter
         return $this->serviceFile;
     }
 
-    /**
-     * Create service.
-     *
-     * @return Froq\Service\ServiceInterface
-     */
-    final private function createService(): ServiceInterface
-    {
-        return new $this->serviceName($this->app,
-          $this->serviceName, $this->serviceMethod, $this->methodArgs);
-    }
-
-    /**
-     * Prepare service name.
-     *
-     * @param  string $name
-     * @return string
-     */
     final private function toServiceName(string $name): string
     {
         $name = preg_replace_callback('~-([a-z])~i', function($match) {
             return ucfirst($match[1]);
         }, ucfirst($name));
-
         return sprintf('%s%s', $name, ServiceInterface::SERVICE_NAME_SUFFIX);
     }
 
-    /**
-     * Prepare service method.
-     *
-     * @param  string $method
-     * @return string
-     */
     final private function toServiceMethod(string $method): string
     {
         $method = preg_replace_callback('~-([a-z])~i', function($match) {
             return ucfirst($match[1]);
         }, ucfirst($method));
-
         return sprintf('%s%s', ServiceInterface::METHOD_NAME_PREFIX, $method);
     }
 
-    /**
-     * Prepare service file.
-     *
-     * @param  string $file
-     * @param  bool    $load
-     * @return string
-     */
     final private function toServiceFile(string $serviceName, bool $load = false): string
     {
         $serviceFile = sprintf('./app/service/%s/%s.php', $serviceName, $serviceName);
@@ -294,12 +176,11 @@ final class ServiceAdapter
         )) {
             $serviceFile = sprintf('./app/service/default/%s/%s.php', $serviceName, $serviceName);
         }
-
-        // load?
-        if ($load) {
-            require_once($serviceFile);
-        }
-
         return $serviceFile;
+    }
+
+    final public function toServiceClass(string $serviceName): string
+    {
+        return sprintf('%s%s', ServiceInterface::NAMESPACE, $serviceName);
     }
 }
