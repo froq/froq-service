@@ -24,9 +24,8 @@ declare(strict_types=1);
 namespace Froq\Service;
 
 use Froq\App;
-use Froq\Util\{View, Config};
+use Froq\Config\Config;
 use Froq\Util\Traits\GetterTrait as Getter;
-use Froq\Validation\{Validation, ValidationRule, ValidationException};
 
 /**
  * @package    Froq
@@ -149,8 +148,7 @@ abstract class Service implements ServiceInterface
         $this->setMethodArgs($methodArgs);
 
         // load config & model
-        $this->loadConfig();
-        $this->loadModel();
+        $this->loadConfig(); $this->loadModel();
 
         // create view @out
         // $this->view = new View($this->app);
@@ -174,7 +172,7 @@ abstract class Service implements ServiceInterface
      */
     final public function setName(string $name = null): self
     {
-        $this->name = (string) $name;
+        $this->name = $name;
 
         return $this;
     }
@@ -195,7 +193,7 @@ abstract class Service implements ServiceInterface
      */
     final public function setMethod(string $method = null): self
     {
-        $this->method = (string) $method;
+        $this->method = $method;
 
         return $this;
     }
@@ -211,12 +209,12 @@ abstract class Service implements ServiceInterface
 
     /**
      * Set method args.
-     * @param  $methodArgs
+     * @param  array $methodArgs
      * @return self
      */
-    final public function setMethodArgs(array $methodArgs = null): self
+    final public function setMethodArgs(array $methodArgs = []): self
     {
-        $this->methodArgs = (array) $methodArgs;
+        $this->methodArgs = $methodArgs;
 
         return $this;
     }

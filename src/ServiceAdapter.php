@@ -24,7 +24,6 @@ declare(strict_types=1);
 namespace Froq\Service;
 
 use Froq\App;
-use Froq\Http\Response\Status;
 
 /**
  * @package    Froq
@@ -101,7 +100,7 @@ final class ServiceAdapter
         if (!$this->isServiceExists()) {
             // set fail stuff that usable in FailService or anywhere
             set_global('app.service.view.fail', [
-                'code' => Status::NOT_FOUND,
+                'code' => 404,
                 'text' => sprintf('Service not found [%s]', $this->serviceName)
             ]);
 
@@ -130,7 +129,7 @@ final class ServiceAdapter
         if (!$this->isServiceFail() && !$this->isServiceMethodExists()) {
             // set fail stuff that usable in FailService or anywhere
             set_global('app.service.view.fail', [
-                'code' => Status::NOT_FOUND,
+                'code' => 404,
                 'text' => sprintf('Service method not found [%s::%s()]',
                     $this->serviceName, $this->serviceMethod)
             ]);
