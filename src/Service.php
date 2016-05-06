@@ -137,15 +137,16 @@ abstract class Service implements ServiceInterface
      * @param Froq\App $app
      * @param string   $name
      * @param string   $method
+     * @param array    $methodArgs
      */
     final public function __construct(App $app,
-        string $name = null, string $method = null, array $methodArgs = [])
+        string $name = null, string $method = null, array $methodArgs = null)
     {
         $this->app = $app;
 
-        $this->setName($name);
-        $this->setMethod($method);
-        $this->setMethodArgs($methodArgs);
+        if ($name) $this->setName($name);
+        if ($method) $this->setMethod($method);
+        if ($methodArgs) $this->setMethodArgs($methodArgs);
 
         // load config & model
         $this->loadConfig(); $this->loadModel();
@@ -170,7 +171,7 @@ abstract class Service implements ServiceInterface
      * @param  string $name
      * @return self
      */
-    final public function setName(string $name = null): self
+    final public function setName(string $name): self
     {
         $this->name = $name;
 
@@ -191,7 +192,7 @@ abstract class Service implements ServiceInterface
      * @param  string $method
      * @return self
      */
-    final public function setMethod(string $method = null): self
+    final public function setMethod(string $method): self
     {
         $this->method = $method;
 
