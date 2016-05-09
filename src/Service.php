@@ -159,7 +159,7 @@ abstract class Service implements ServiceInterface
 
         // prevent lowercased method names
         if (!empty($this->allowedRequestMethods)) {
-            $this->allowedRequestMethods = array_map('strtoupper', $this->allowedRequestMethods);
+            $this->setAllowedRequestMethods($this->allowedRequestMethods);
         }
     }
 
@@ -284,10 +284,10 @@ abstract class Service implements ServiceInterface
 
     /**
      * Set allowed request methods.
-     * @param  string ...$allowedRequestMethods
+     * @param  array $allowedRequestMethods
      * @return self
      */
-    final public function setAllowedRequestMethods(array ...$allowedRequestMethods): self
+    final public function setAllowedRequestMethods(array $allowedRequestMethods): self
     {
         $this->allowedRequestMethods = array_map('strtoupper', $allowedRequestMethods);
 
