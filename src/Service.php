@@ -143,26 +143,16 @@ abstract class Service implements ServiceInterface
         if ($method) $this->setMethod($method);
         if ($methodArgs) $this->setMethodArgs($methodArgs);
 
-        // load config & model
+        // load config & validation
         $this->loadConfig();
+        $this->loadValidation();
 
-        // @out?
-        $this->loadModel();
+        // @todo autolod..
+        // $this->loadModel();
 
         // create view
         if ($this->useView) {
-            $this->view = new View($this->app, null, $this->useViewPartials);
-        }
-
-        // create validation @out
-        // if (empty($this->validationRules) && $this->config != null) {
-        //     $this->validationRules = $this->config->get('validation.rules', []);
-        // }
-        // $this->validation = new Validation($this->validationRules);
-
-        // prevent lowercased method names
-        if (!empty($this->allowedRequestMethods)) {
-            $this->setAllowedRequestMethods($this->allowedRequestMethods);
+            $this->view = new View($this->app);
         }
     }
 
@@ -325,24 +315,26 @@ abstract class Service implements ServiceInterface
      */
     final private function loadConfig(): self
     {
+        $this->config = new Config();
+
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
         if (is_file($file)) {
-            $this->config = new Config($file);
+            $this->config->setData(require($file));
         }
 
         return $this;
     }
 
     /**
-     * Load model.
+     * Load validation.
      * @return self
      */
-    final private function loadModel(): self
+    final private function loadValidation(): self
     {
-        $file = sprintf('./app/service/%s/model/model.php', $this->name);
-        if (is_file($file)) {
-            require($file);
+        if (empty($this->validationRules)) {
+            $this->validationRules = $this->config->get('validation.rules', []);
         }
+        $this->validation = new Validation($this->validationRules);
 
         return $this;
     }
