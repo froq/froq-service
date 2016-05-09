@@ -401,6 +401,15 @@ abstract class Service implements ServiceInterface
     }
 
     /**
+     * Check uses view.
+     * @return bool
+     */
+    final public function usesView(): bool
+    {
+        return ($this->useView == true);
+    }
+
+    /**
      * Check uses session.
      * @return bool
      */
