@@ -96,6 +96,12 @@ abstract class Service implements ServiceInterface
     protected $useSession = false;
 
     /**
+     * Use both head/foot files.
+     * @var bool
+     */
+    protected $useViewPartialAll  = false;
+
+    /**
      * Use head file.
      * @var bool
      */
@@ -106,12 +112,6 @@ abstract class Service implements ServiceInterface
      * @var bool
      */
     protected $useViewPartialFoot = false;
-
-    /**
-     * Use both head/foot files.
-     * @var bool
-     */
-    protected $useViewPartialAll  = false;
 
     /**
      * Validation.
