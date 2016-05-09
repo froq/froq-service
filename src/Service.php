@@ -67,14 +67,8 @@ abstract class Service implements ServiceInterface
     protected $methodArgs = [];
 
     /**
-     * Service model.
-     * @var Froq\Database\Model\Model
-     */
-    protected $model;
-
-    /**
      * Service view.
-     * @var Froq\Util\View
+     * @var Froq\View\View
      */
     protected $view;
 
@@ -83,6 +77,12 @@ abstract class Service implements ServiceInterface
      * @var Froq\Util\Config
      */
     protected $config;
+
+    /**
+     * Service model.
+     * @var Froq\Database\Model\Model
+     */
+    protected $model;
 
     /**
      * Call only main() method.
@@ -103,6 +103,12 @@ abstract class Service implements ServiceInterface
     protected $useViewPartials = false;
 
     /**
+     * Use session.
+     * @var bool
+     */
+    protected $useSession = false;
+
+    /**
      * Validation.
      * @var Froq\Validation\Validation
      */
@@ -113,12 +119,6 @@ abstract class Service implements ServiceInterface
      * @var array
      */
     protected $validationRules = [];
-
-    /**
-     * Use session.
-     * @var bool
-     */
-    protected $useSession = false;
 
     /**
      * Request method limiter.
@@ -357,10 +357,15 @@ abstract class Service implements ServiceInterface
                 "Set service \$useView property as TRUE and be sure " .
                 "that already included 'froq/froq-view' module via Composer."
             );
-
         }
 
-        $this->view->setFile($file)->displayAll($data);
+        $this->view->setFile($file);
+        if ($this->useViewPartials) {
+            $this->view->setHeadFile();
+            $this->view->setFootFile();
+        }
+
+        $this->view->displayAll($data);
     }
 
     /**
@@ -387,7 +392,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isDefaultService(): bool
     {
-        return ($this->isMain() || $this->isFail());
+        return ($this->isMainService() || $this->isFailService());
     }
 
     /**
