@@ -1,17 +1,84 @@
 <?php
+/**
+ * Copyright (c) 2016 Kerem Güneş
+ *    <k-gun@mail.com>
+ *
+ * GNU General Public License v3.0
+ *    <http://www.gnu.org/licenses/gpl-3.0.txt>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 declare(strict_types=1);
+
 namespace Froq\Service;
+
 use Froq\App;
 
+/**
+ * @package    Froq
+ * @subpackage Froq\Service
+ * @object     Froq\Service\ServiceAdapter
+ * @author     Kerem Güneş <k-gun@mail.com>
+ */
 final class ServiceAdapter
 {
+    /**
+     * App object.
+     * @var Froq\App
+     */
+    private $app;
+
+    /**
+     * Service object.
+     * @var Froq\Service\Service
+     */
     private $service;
+
+    /**
+     * Service name.
+     * @var string
+     */
     private $serviceName;
+
+    /**
+     * Service method.
+     * @var string
+     */
     private $serviceMethod;
+
+    /**
+     * Service method args.
+     * @var array
+     */
     private $serviceMethodArgs = [];
+
+    /**
+     * Service file.
+     * @var string
+     */
     private $serviceFile;
+
+    /**
+     * Service class.
+     * @var string
+     */
     private $serviceClass;
 
+    /**
+     * Constructor.
+     * @param Froq\App $app
+     */
     final public function __construct(App $app)
     {
         $this->app = $app;
@@ -93,18 +160,32 @@ final class ServiceAdapter
         }
     }
 
+    /**
+     * Check service exists.
+     * @return bool
+     */
     final public function isServiceExists(): bool
     {
         if (!is_file($this->serviceFile)) {
             return false;
         }
+
         return class_exists($this->serviceClass, true);
     }
+
+    /**
+     * Check service method exists.
+     * @return bool
+     */
     final public function isServiceMethodExists(): bool
     {
         return ($this->service && method_exists($this->service, $this->serviceMethod));
     }
 
+    /**
+     * Create service.
+     * @return Froq\Service\ServiceInterface
+     */
     final public function createService(): ServiceInterface
     {
         return new $this->serviceClass($this->app,
@@ -151,23 +232,40 @@ final class ServiceAdapter
         return $this->serviceFile;
     }
 
-    final private function toServiceName(string $name): string
+    /**
+     * Prepare service name.
+     * @param  string $serviceName
+     * @return string
+     */
+    final private function toServiceName(string $serviceName): string
     {
-        $name = preg_replace_callback('~-([a-z])~i', function($match) {
+        $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
             return ucfirst($match[1]);
-        }, ucfirst($name));
-        return sprintf('%s%s', $name, ServiceInterface::SERVICE_NAME_SUFFIX);
+        }, ucfirst($serviceName));
+
+        return sprintf('%s%s', $serviceName, ServiceInterface::SERVICE_NAME_SUFFIX);
     }
 
-    final private function toServiceMethod(string $method): string
+    /**
+     * Prepare service method.
+     * @param  string $serviceMethod
+     * @return string
+     */
+    final private function toServiceMethod(string $serviceMethod): string
     {
-        $method = preg_replace_callback('~-([a-z])~i', function($match) {
+        $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
             return ucfirst($match[1]);
-        }, ucfirst($method));
-        return sprintf('%s%s', ServiceInterface::METHOD_NAME_PREFIX, $method);
+        }, ucfirst($serviceMethod));
+
+        return sprintf('%s%s', ServiceInterface::METHOD_NAME_PREFIX, $serviceMethod);
     }
 
-    final private function toServiceFile(string $serviceName, bool $load = false): string
+    /**
+     * Prepare service name.
+     * @param  string $serviceName
+     * @return string
+     */
+    final private function toServiceFile(string $serviceName): string
     {
         $serviceFile = sprintf('./app/service/%s/%s.php', $serviceName, $serviceName);
         if (!is_file($serviceFile) && (
@@ -176,9 +274,15 @@ final class ServiceAdapter
         )) {
             $serviceFile = sprintf('./app/service/default/%s/%s.php', $serviceName, $serviceName);
         }
+
         return $serviceFile;
     }
 
+    /**
+     * Prepare service class.
+     * @param  string $serviceName
+     * @return string
+     */
     final public function toServiceClass(string $serviceName): string
     {
         return sprintf('%s%s', ServiceInterface::NAMESPACE, $serviceName);
