@@ -23,9 +23,10 @@ declare(strict_types=1);
 
 namespace Froq\Service;
 
+use Froq\Util\Traits\GetterTrait as Getter;
 use Froq\App;
 use Froq\Config\Config;
-use Froq\Util\Traits\GetterTrait as Getter;
+use Froq\View\View;
 
 /**
  * @package    Froq
@@ -90,28 +91,16 @@ abstract class Service implements ServiceInterface
     protected $useMainOnly = false;
 
     /**
-     * Use session.
+     * Use view.
      * @var bool
      */
-    protected $useSession = false;
+    protected $useView = false;
 
     /**
-     * Use both head/foot files.
+     * Use head/foot files.
      * @var bool
      */
-    protected $useViewPartialAll  = false;
-
-    /**
-     * Use head file.
-     * @var bool
-     */
-    protected $useViewPartialHead = false;
-
-    /**
-     * Use foot file.
-     * @var bool
-     */
-    protected $useViewPartialFoot = false;
+    protected $useViewPartials = false;
 
     /**
      * Validation.
@@ -124,6 +113,12 @@ abstract class Service implements ServiceInterface
      * @var array
      */
     protected $validationRules = [];
+
+    /**
+     * Use session.
+     * @var bool
+     */
+    protected $useSession = false;
 
     /**
      * Request method limiter.
@@ -151,8 +146,10 @@ abstract class Service implements ServiceInterface
         // load config & model
         $this->loadConfig(); $this->loadModel();
 
-        // create view @out
-        // $this->view = new View($this->app);
+        // create view
+        if ($this->useView) {
+            $this->view = new View($this->app, null, $this->useViewPartials);
+        }
 
         // create validation @out
         // if (empty($this->validationRules) && $this->config != null) {
@@ -355,33 +352,14 @@ abstract class Service implements ServiceInterface
      */
     final public function view(string $file, array $data = null)
     {
-        // use both header/footer
-        if ($this->useViewPartialAll || ($this->useViewPartialHead && $this->useViewPartialFoot)) {
-            $this->view->displayHead($data);
-            $this->view->display($file, $data);
-            $this->view->displayFoot($data);
-        }
-        // use only header
-        elseif ($this->useViewPartialHead && !$this->useViewPartialFoot) {
-            $this->view->displayHead($data);
-            $this->view->display($file, $data);
-        }
-        // use only footer
-        elseif (!$this->useViewPartialHead && $this->useViewPartialFoot) {
-            $this->view->display($file, $data);
-            $this->view->displayFoot($data);
-        }
-        // use only view file
-        else {
-            $this->view->display($file, $data);
-        }
+        $this->view->setFile($file)->displayAll($data);
     }
 
     /**
      * Check is main service.
      * @return bool
      */
-    final public function isMainService(): bool
+    final public function isMain(): bool
     {
         return ($this->name == ServiceInterface::SERVICE_MAIN);
     }
@@ -390,7 +368,7 @@ abstract class Service implements ServiceInterface
      * Check is fail service.
      * @return bool
      */
-    final public function isFailService(): bool
+    final public function isFail(): bool
     {
         return ($this->name == ServiceInterface::SERVICE_FAIL);
     }
@@ -399,12 +377,9 @@ abstract class Service implements ServiceInterface
      * Check is default service (fail, main).
      * @return bool
      */
-    final public function isDefaultService(): bool
+    final public function isDefault(): bool
     {
-        return (
-            $this->name == ServiceInterface::SERVICE_MAIN ||
-            $this->name == ServiceInterface::SERVICE_FAIL
-        );
+        return ($this->isMain() || $this->isFail());
     }
 
     /**
