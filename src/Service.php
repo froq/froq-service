@@ -67,16 +67,16 @@ abstract class Service implements ServiceInterface
     protected $methodArgs = [];
 
     /**
-     * Service view.
-     * @var Froq\View\View
-     */
-    protected $view;
-
-    /**
      * Service config.
      * @var Froq\Util\Config
      */
     protected $config;
+
+    /**
+     * Service view.
+     * @var Froq\View\View
+     */
+    protected $view;
 
     /**
      * Service model.
@@ -143,8 +143,8 @@ abstract class Service implements ServiceInterface
         if ($method) $this->setMethod($method);
         if ($methodArgs) $this->setMethodArgs($methodArgs);
 
-        // set config
-        $this->config = new Config();
+        // load config & model
+        $this->loadConfig();
 
         // @out?
         $this->loadModel();
@@ -235,8 +235,6 @@ abstract class Service implements ServiceInterface
      */
     final public function run()
     {
-        $this->loadConfig();
-
         // call init method
         if (method_exists($this, ServiceInterface::METHOD_INIT)) {
             $this->{ServiceInterface::METHOD_INIT}();
@@ -329,7 +327,7 @@ abstract class Service implements ServiceInterface
     {
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
         if (is_file($file)) {
-            $this->config->setData(require($file));
+            $this->config = new Config($file);
         }
 
         return $this;
