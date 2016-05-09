@@ -84,34 +84,34 @@ abstract class Service implements ServiceInterface
     protected $config;
 
     /**
-     * Use session.
-     * @var bool
-     */
-    protected $useSession = false;
-
-    /**
      * Call only main() method.
      * @var bool
      */
     protected $useMainOnly = false;
 
     /**
-     * Use both header/footer files.
+     * Use session.
      * @var bool
      */
-    protected $useViewPartialAll  = false;
+    protected $useSession = false;
 
     /**
-     * Use header file.
+     * Use head file.
      * @var bool
      */
     protected $useViewPartialHead = false;
 
     /**
-     * Use footer file.
+     * Use foot file.
      * @var bool
      */
     protected $useViewPartialFoot = false;
+
+    /**
+     * Use both head/foot files.
+     * @var bool
+     */
+    protected $useViewPartialAll  = false;
 
     /**
      * Validation.
