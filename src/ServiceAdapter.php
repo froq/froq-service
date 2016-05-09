@@ -58,12 +58,6 @@ final class ServiceAdapter
     private $serviceMethod;
 
     /**
-     * Service method args.
-     * @var array
-     */
-    private $serviceMethodArgs = [];
-
-    /**
      * Service file.
      * @var string
      */
@@ -164,15 +158,15 @@ final class ServiceAdapter
             // set service method args
             if ($this->isServiceMethodExists()) {
                 $methodArgs = array_slice($this->app->request->uri->segments(), 2);
-                $methodReflection = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
-                foreach ($methodReflection->getParameters() as $i => $param) {
+                $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
+                foreach ($ref->getParameters() as $i => $param) {
                     if (!isset($methodArgs[$i])) {
-                        $methodArgs[$i] = $param->isOptional()
+                        $methodArgs[$i] = $param->isDefaultValueAvailable()
                             ? $param->getDefaultValue() : null;
                     }
                 }
 
-                $this->service->setMethodArgs($this->methodArgs = $methodArgs);
+                $this->service->setMethodArgs($methodArgs);
             }
         }
     }
@@ -205,8 +199,7 @@ final class ServiceAdapter
      */
     final public function createService(): ServiceInterface
     {
-        return new $this->serviceClass($this->app,
-            $this->serviceName, $this->serviceMethod, $this->serviceMethodArgs);
+        return new $this->serviceClass($this->app, $this->serviceName, $this->serviceMethod);
     }
 
     /**
