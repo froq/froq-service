@@ -143,8 +143,8 @@ abstract class Service implements ServiceInterface
         if ($method) $this->setMethod($method);
         if ($methodArgs) $this->setMethodArgs($methodArgs);
 
-        // load config & model
-        $this->loadConfig();
+        // set config
+        $this->config = new Config();
 
         // @out?
         $this->loadModel();
@@ -235,6 +235,8 @@ abstract class Service implements ServiceInterface
      */
     final public function run()
     {
+        $this->loadConfig();
+
         // call init method
         if (method_exists($this, ServiceInterface::METHOD_INIT)) {
             $this->{ServiceInterface::METHOD_INIT}();
@@ -327,7 +329,7 @@ abstract class Service implements ServiceInterface
     {
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
         if (is_file($file)) {
-            $this->config = new Config($file);
+            $this->config->setData(require($file));
         }
 
         return $this;
