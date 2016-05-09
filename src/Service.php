@@ -352,6 +352,14 @@ abstract class Service implements ServiceInterface
      */
     final public function view(string $file, array $data = null)
     {
+        if (!$this->useView || !$this->view) {
+            throw new ServiceException(
+                "Set service \$useView property as TRUE and be sure " .
+                "that already included 'froq/froq-view' module via Composer."
+            );
+
+        }
+
         $this->view->setFile($file)->displayAll($data);
     }
 
@@ -359,7 +367,7 @@ abstract class Service implements ServiceInterface
      * Check is main service.
      * @return bool
      */
-    final public function isMain(): bool
+    final public function isMainService(): bool
     {
         return ($this->name == ServiceInterface::SERVICE_MAIN);
     }
@@ -368,7 +376,7 @@ abstract class Service implements ServiceInterface
      * Check is fail service.
      * @return bool
      */
-    final public function isFail(): bool
+    final public function isFailService(): bool
     {
         return ($this->name == ServiceInterface::SERVICE_FAIL);
     }
@@ -377,7 +385,7 @@ abstract class Service implements ServiceInterface
      * Check is default service (fail, main).
      * @return bool
      */
-    final public function isDefault(): bool
+    final public function isDefaultService(): bool
     {
         return ($this->isMain() || $this->isFail());
     }
