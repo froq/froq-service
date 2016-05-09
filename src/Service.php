@@ -377,7 +377,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isMainService(): bool
     {
-        return ($this->name == ServiceInterface::SERVICE_MAIN);
+        return ($this->name == ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -386,7 +386,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isFailService(): bool
     {
-        return ($this->name == ServiceInterface::SERVICE_FAIL);
+        return ($this->name == ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX);
     }
 
     /**
