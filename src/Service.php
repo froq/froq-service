@@ -49,37 +49,37 @@ abstract class Service implements ServiceInterface
     protected $app;
 
     /**
-     * Service name.
+     * Name.
      * @var string
      */
     protected $name;
 
     /**
-     * Service method.
+     * Method.
      * @var string
      */
     protected $method;
 
     /**
-     * Service method args.
+     * Method args.
      * @var array
      */
     protected $methodArgs = [];
 
     /**
-     * Service config.
+     * Config object.
      * @var Froq\Util\Config
      */
     protected $config;
 
     /**
-     * Service view.
+     * View object.
      * @var Froq\View\View
      */
     protected $view;
 
     /**
-     * Service model.
+     * Model object.
      * @var Froq\Database\Model\Model
      */
     protected $model;
@@ -109,7 +109,7 @@ abstract class Service implements ServiceInterface
     protected $useSession = false;
 
     /**
-     * Validation.
+     * Validation object.
      * @var Froq\Validation\Validation
      */
     protected $validation;
