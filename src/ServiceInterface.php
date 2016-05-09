@@ -49,8 +49,8 @@ interface ServiceInterface
      * @const string
      */
     const SERVICE_NAME_SUFFIX   = 'Service',
-          SERVICE_MAIN          = 'MainService',
-          SERVICE_FAIL          = 'FailService';
+          SERVICE_MAIN          = 'Main',
+          SERVICE_FAIL          = 'Fail';
 
     /**
      * Service method names, prefix.

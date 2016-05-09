@@ -144,7 +144,10 @@ abstract class Service implements ServiceInterface
         if ($methodArgs) $this->setMethodArgs($methodArgs);
 
         // load config & model
-        $this->loadConfig(); $this->loadModel();
+        $this->loadConfig();
+
+        // @out?
+        $this->loadModel();
 
         // create view
         if ($this->useView) {
