@@ -148,11 +148,12 @@ final class ServiceAdapter
             // set service method args
             if ($this->isServiceMethodExists()) {
                 $methodArgs = array_slice($this->app->request->uri->segments(), 2);
-                $methodArgsCount = count($methodArgs);
-                $methodArgsCountRef = (new \ReflectionMethod($this->serviceClass, $this->serviceMethod))
-                    ->getNumberOfParameters();
-                if ($methodArgsCount < $methodArgsCountRef) {
-                    $methodArgs += array_fill($methodArgsCount, $methodArgsCountRef - $methodArgsCount, null);
+                $methodReflection = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
+                foreach ($methodReflection->getParameters() as $i => $param) {
+                    if (!isset($methodArgs[$i])) {
+                        $methodArgs[$i] = $param->isOptional()
+                            ? $param->getDefaultValue() : null;
+                    }
                 }
 
                 $this->service->setMethodArgs($this->methodArgs = $methodArgs);
