@@ -90,7 +90,7 @@ final class ServiceAdapter
         $serviceNameAlias = '';
         $serviceName = strtolower($this->app->request->uri->segment(0, ''));
         // check alias
-        if (array_key_exists($serviceName, $serviceAliases)) {
+        if (array_key_exists($serviceName, $serviceAliases) && $serviceAliases[$serviceName][0]) {
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
         } else {
