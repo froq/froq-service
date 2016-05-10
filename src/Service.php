@@ -142,9 +142,6 @@ abstract class Service implements ServiceInterface
         $this->loadConfig();
         $this->loadValidation();
 
-        // @todo autolod..
-        // $this->loadModel();
-
         // create view
         if ($this->useView) {
             $this->view = new View($this->app);
