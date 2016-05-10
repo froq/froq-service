@@ -23,11 +23,11 @@ declare(strict_types=1);
 
 namespace Froq\Service;
 
-use Froq\Util\Traits\GetterTrait as Getter;
 use Froq\App;
-use Froq\Config\Config;
 use Froq\View\View;
+use Froq\Config\Config;
 use Froq\Validation\Validation;
+use Froq\Util\Traits\GetterTrait as Getter;
 
 /**
  * @package    Froq
