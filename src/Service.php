@@ -225,6 +225,8 @@ abstract class Service implements ServiceInterface
      */
     final public function run()
     {
+        $output = null;
+
         // call external onbefore
         $this->app->events->fire('service.before');
 
@@ -233,13 +235,19 @@ abstract class Service implements ServiceInterface
             $this->{ServiceInterface::METHOD_INIT}();
         }
 
+        // check method
+        if (!$this->isAllowedRequestMethod($this->app->request->method->getName())) {
+            $this->app->response->setStatus(405);
+            $this->app->response->setContentType('none');
+
+            return $output;
+        }
 
         // call internal onbefore
         if (method_exists($this, ServiceInterface::METHOD_ONBEFORE)) {
             $this->{ServiceInterface::METHOD_ONBEFORE}();
         }
 
-        $output = null;
         // site interface
         if ($this->protocol == ServiceInterface::PROTOCOL_SITE) {
             // always uses main method?
@@ -299,6 +307,7 @@ abstract class Service implements ServiceInterface
 
     /**
      * Check request method is allowed.
+     * @param  string $requestMethod
      * @return bool
      */
     final public function isAllowedRequestMethod(string $requestMethod): bool
