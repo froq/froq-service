@@ -27,6 +27,7 @@ use Froq\Util\Traits\GetterTrait as Getter;
 use Froq\App;
 use Froq\Config\Config;
 use Froq\View\View;
+use Froq\Validation\Validation;
 
 /**
  * @package    Froq
