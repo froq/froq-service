@@ -125,7 +125,7 @@ final class ServiceAdapter
                     $this->serviceMethod = $this->toServiceMethod(
                         $serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
                 } elseif ($serviceMethod == '' || $serviceMethod == ServiceInterface::METHOD_MAIN) {
-                    $this->serviceMethod = $serviceMethod;
+                    $this->serviceMethod = ServiceInterface::METHOD_MAIN;
                 } else {
                     $this->serviceMethod = $this->toServiceMethod($serviceMethod);
                 }
