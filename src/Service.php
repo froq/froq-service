@@ -312,38 +312,6 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Load service sprecific configs.
-     * @return self
-     */
-    final private function loadConfig(): self
-    {
-        $this->config = new Config();
-
-        $file = sprintf('./app/service/%s/config/config.php', $this->name);
-        if (is_file($file)) {
-            $this->config->setData(require($file));
-        }
-
-        return $this;
-    }
-
-    /**
-     * Load validation.
-     * @return self
-     */
-    final private function loadValidation(): self
-    {
-        $this->validation = new Validation();
-
-        $validationRules = $this->config->get('validation.rules');
-        if (!empty($validationRules)) {
-            $this->validation->setRules($validationRules);
-        }
-
-        return $this;
-    }
-
-    /**
      * View support.
      * @param  string $file
      * @param  array  $data
@@ -437,5 +405,37 @@ abstract class Service implements ServiceInterface
     final public function usesSession(): bool
     {
         return ($this->useSession == true);
+    }
+
+    /**
+     * Load service sprecific configs.
+     * @return self
+     */
+    final private function loadConfig(): self
+    {
+        $this->config = new Config();
+
+        $file = sprintf('./app/service/%s/config/config.php', $this->name);
+        if (is_file($file)) {
+            $this->config->setData(require($file));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Load validation.
+     * @return self
+     */
+    final private function loadValidation(): self
+    {
+        $this->validation = new Validation();
+
+        $validationRules = $this->config->get('validation.rules');
+        if (!empty($validationRules)) {
+            $this->validation->setRules($validationRules);
+        }
+
+        return $this;
     }
 }
