@@ -98,7 +98,7 @@ final class ServiceAdapter
 
         // set service as FailService
         if (!$this->isServiceExists()) {
-            set_global('app.service.view.fail', [
+            set_global('app.service.fail', [
                 'code' => 404,
                 'text' => sprintf('Service not found [%s]', $this->serviceName),
             ]);
@@ -136,7 +136,7 @@ final class ServiceAdapter
 
             // check method
             if (!$this->isServiceMethodExists()) {
-                set_global('app.service.view.fail', [
+                set_global('app.service.fail', [
                     'code' => 404,
                     'text' => sprintf('Service method not found [%s::%s()]',
                         $this->serviceName, $this->serviceMethod)
