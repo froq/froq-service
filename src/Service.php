@@ -225,13 +225,14 @@ abstract class Service implements ServiceInterface
      */
     final public function run()
     {
+        // call external onbefore
+        $this->app->events->fire('service.before');
+
         // call init method
         if (method_exists($this, ServiceInterface::METHOD_INIT)) {
             $this->{ServiceInterface::METHOD_INIT}();
         }
 
-        // call external onbefore
-        $this->app->events->fire('service.methodBefore');
 
         // call internal onbefore
         if (method_exists($this, ServiceInterface::METHOD_ONBEFORE)) {
@@ -270,7 +271,7 @@ abstract class Service implements ServiceInterface
         }
 
         // call external onafter
-        $this->app->events->fire('service.methodAfter');
+        $this->app->events->fire('service.after');
 
         return $output;
     }
