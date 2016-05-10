@@ -85,6 +85,12 @@ abstract class Service implements ServiceInterface
     protected $model;
 
     /**
+     * Validation object.
+     * @var Froq\Validation\Validation
+     */
+    protected $validation;
+
+    /**
      * Call only main() method.
      * @var bool
      */
@@ -107,18 +113,6 @@ abstract class Service implements ServiceInterface
      * @var bool
      */
     protected $useSession = false;
-
-    /**
-     * Validation object.
-     * @var Froq\Validation\Validation
-     */
-    protected $validation;
-
-    /**
-     * Validation rules (that could be overwriten calling validation::setRules() method after.)
-     * @var array
-     */
-    protected $validationRules = [];
 
     /**
      * Request method limiter.
@@ -341,10 +335,12 @@ abstract class Service implements ServiceInterface
      */
     final private function loadValidation(): self
     {
-        if (empty($this->validationRules)) {
-            $this->validationRules = $this->config->get('validation.rules', []);
+        $this->validation = new Validation();
+
+        $validationRules = $this->config->get('validation.rules');
+        if (!empty($validationRules)) {
+            $this->validation->setRules($validationRules);
         }
-        $this->validation = new Validation($this->validationRules);
 
         return $this;
     }
@@ -428,20 +424,20 @@ abstract class Service implements ServiceInterface
     }
 
     /**
+     * Check uses view partials.
+     * @return bool
+     */
+    final public function usesViewPartials(): bool
+    {
+        return ($this->useViewPartials == true);
+    }
+
+    /**
      * Check uses session.
      * @return bool
      */
     final public function usesSession(): bool
     {
         return ($this->useSession == true);
-    }
-
-    /**
-     * Check uses validation.
-     * @return bool
-     */
-    final public function usesValidation(): bool
-    {
-        return ($this->validation && !empty($this->validationRules));
     }
 }
