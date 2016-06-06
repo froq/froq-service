@@ -27,7 +27,7 @@ use Froq\App;
 use Froq\View\View;
 use Froq\Config\Config;
 use Froq\Validation\Validation;
-use Froq\Util\Traits\GetterTrait as Getter;
+use Froq\Util\Traits\GetterTrait;
 
 /**
  * @package    Froq
@@ -41,7 +41,7 @@ abstract class Service implements ServiceInterface
      * Getter.
      * @object Froq\Util\Traits\Getter
      */
-    use Getter;
+    use GetterTrait;
 
     /**
      * Froq object.
