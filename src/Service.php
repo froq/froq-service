@@ -328,8 +328,8 @@ abstract class Service implements ServiceInterface
 
         $this->view->setFile($file);
         if ($this->useViewPartials) {
-            $this->view->setHeadFile();
-            $this->view->setFootFile();
+            $this->view->setFileHead();
+            $this->view->setFileFoot();
         }
 
         $this->view->displayAll($data);
