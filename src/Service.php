@@ -144,7 +144,7 @@ abstract class Service implements ServiceInterface
 
         // create view
         if ($this->useView) {
-            $this->view = new View($this->app);
+            $this->view = new View($this);
         }
     }
 
