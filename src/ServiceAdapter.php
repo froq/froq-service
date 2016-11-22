@@ -136,20 +136,25 @@ final class ServiceAdapter
 
             // check method
             if (!$this->isServiceMethodExists()) {
-                set_global('app.service.fail', [
-                    'code' => 404,
-                    'text' => sprintf('Service method not found [%s::%s()]',
-                        $this->serviceName, $this->serviceMethod)
-                ]);
+                // check fallback method
+                if ($this->isServiceMethodFallExists()) {
+                    $this->serviceMethod = ServiceInterface::METHOD_FALL;
+                } else {
+                    set_global('app.service.fail', [
+                        'code' => 404,
+                        'text' => sprintf('Service method not found [%s::%s()]',
+                            $this->serviceName, $this->serviceMethod)
+                    ]);
 
-                // overwrite
-                $this->serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
-                $this->serviceMethod = ServiceInterface::METHOD_MAIN;
-                $this->serviceFile   = $this->toServiceFile($this->serviceName);
-                $this->serviceClass  = $this->toServiceClass($this->serviceName);
+                    // overwrite
+                    $this->serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
+                    $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+                    $this->serviceFile   = $this->toServiceFile($this->serviceName);
+                    $this->serviceClass  = $this->toServiceClass($this->serviceName);
 
-                // re-create service as FailService
-                $this->service = $this->createService();
+                    // re-create service as FailService
+                    $this->service = $this->createService();
+                }
             }
 
             // set service method
@@ -191,6 +196,15 @@ final class ServiceAdapter
     final public function isServiceMethodExists(): bool
     {
         return ($this->service && method_exists($this->service, $this->serviceMethod));
+    }
+
+    /**
+     * Check service fallback method exists.
+     * @return bool
+     */
+    final public function isServiceMethodFallExists(): bool
+    {
+        return ($this->service && method_exists($this->service, ServiceInterface::METHOD_FALL));
     }
 
     /**

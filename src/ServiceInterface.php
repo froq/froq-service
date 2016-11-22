@@ -59,6 +59,7 @@ interface ServiceInterface
     const METHOD_NAME_PREFIX    = 'do',
           METHOD_INIT           = 'init',
           METHOD_MAIN           = 'main',
+          METHOD_FALL           = 'fall',
           METHOD_ONBEFORE       = 'onBefore',
           METHOD_ONAFTER        = 'onAfter';
 }
