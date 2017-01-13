@@ -77,15 +77,14 @@ final class ServiceAdapter
     {
         $this->app = $app;
 
-        // aliases
-        $serviceAliases = $this->app->config->get('app.service.aliases', []);
+        $serviceAliases = $app->config->get('app.service.aliases', []);
 
-        // detect service name
+        // detect service name if provided
         $serviceNameAlias = '';
-        $serviceName = strtolower($this->app->request->uri->segment(0, ''));
-        // check alias
-        if (array_key_exists($serviceName, $serviceAliases)
-            && isset($serviceAliases[$serviceName][0])) {
+        $serviceName = strtolower($app->request->uri->segment(0, ''));
+
+        // 0 means name
+        if (!empty($serviceAliases[$serviceName][0])) {
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
         } else {
@@ -114,16 +113,13 @@ final class ServiceAdapter
         if (!$this->service->isFailService()) {
             // detect service method
             if ($this->service->useMainOnly) {
-                // main only
                 $this->serviceMethod = ServiceInterface::METHOD_MAIN;
             } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_SITE) {
                 // from segment
-                $serviceMethod = strtolower($this->app->request->uri->segment(1, ''));
+                $serviceMethod = strtolower($app->request->uri->segment(1, ''));
                 // check alias
-                if (isset($serviceAliases[$serviceNameAlias]['methods'])
-                    && array_key_exists($serviceMethod, $serviceAliases[$serviceNameAlias]['methods'])) {
-                    $this->serviceMethod = $this->toServiceMethod(
-                        $serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
+                if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) {
+                    $this->serviceMethod = $this->toServiceMethod($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
                 } elseif ($serviceMethod == '' || $serviceMethod == ServiceInterface::METHOD_MAIN) {
                     $this->serviceMethod = ServiceInterface::METHOD_MAIN;
                 } else {
@@ -131,7 +127,7 @@ final class ServiceAdapter
                 }
             } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_REST) {
                 // from request method
-                $this->serviceMethod = strtolower($this->app->request->method);
+                $this->serviceMethod = strtolower($app->request->method);
             }
 
             // check method
@@ -157,12 +153,11 @@ final class ServiceAdapter
                 }
             }
 
-            // set service method
             $this->service->setMethod($this->serviceMethod);
 
             // set service method args
             if ($this->isServiceMethodExists()) {
-                $methodArgs = array_slice($this->app->request->uri->segments(), 2);
+                $methodArgs = array_slice($app->request->uri->segments(), 2);
                 $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
                     if (!isset($methodArgs[$i])) {
@@ -211,7 +206,7 @@ final class ServiceAdapter
      * Create service.
      * @return Froq\Service\ServiceInterface
      */
-    final public function createService(): ServiceInterface
+    final private function createService(): ServiceInterface
     {
         return new $this->serviceClass($this->app, $this->serviceName, $this->serviceMethod);
     }

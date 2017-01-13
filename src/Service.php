@@ -129,8 +129,7 @@ abstract class Service implements ServiceInterface
      * @param string   $method
      * @param array    $methodArgs
      */
-    final public function __construct(App $app,
-        string $name = null, string $method = null, array $methodArgs = null)
+    final public function __construct(App $app, string $name = null, string $method = null, array $methodArgs = null)
     {
         $this->app = $app;
 
