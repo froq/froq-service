@@ -157,16 +157,16 @@ final class ServiceAdapter
 
             // set service method args
             if ($this->isServiceMethodExists()) {
-                $methodArgs = array_slice($app->request->uri->segments(), 2);
+                $methodArguments = $app->request->uri->segmentArguments();
                 $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
-                    if (!isset($methodArgs[$i])) {
-                        $methodArgs[$i] = $param->isDefaultValueAvailable()
+                    if (!isset($methodArguments[$i])) {
+                        $methodArguments[$i] = $param->isDefaultValueAvailable()
                             ? $param->getDefaultValue() : null;
                     }
                 }
 
-                $this->service->setMethodArgs($methodArgs);
+                $this->service->setMethodArguments($methodArguments);
             }
         }
     }
