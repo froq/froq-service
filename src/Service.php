@@ -65,7 +65,19 @@ abstract class Service implements ServiceInterface
      * Method args.
      * @var array
      */
-    protected $methodArgs = [];
+    protected $methodArguments = [];
+
+    /**
+     * URI.
+     * @var string
+     */
+    protected $uri;
+
+    /**
+     * URI full.
+     * @var string
+     */
+    protected $uriFull;
 
     /**
      * Config object.
@@ -127,15 +139,15 @@ abstract class Service implements ServiceInterface
      * @param Froq\App $app
      * @param string   $name
      * @param string   $method
-     * @param array    $methodArgs
+     * @param array    $methodArguments
      */
-    final public function __construct(App $app, string $name = null, string $method = null, array $methodArgs = null)
+    final public function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
     {
         $this->app = $app;
 
         if ($name) $this->setName($name);
         if ($method) $this->setMethod($method);
-        if ($methodArgs) $this->setMethodArgs($methodArgs);
+        if ($methodArguments) $this->setMethodArguments($methodArguments);
 
         // load config & validation
         $this->loadConfig();
@@ -191,12 +203,12 @@ abstract class Service implements ServiceInterface
 
     /**
      * Set method args.
-     * @param  array $methodArgs
+     * @param  array $methodArguments
      * @return self
      */
-    final public function setMethodArgs(array $methodArgs = []): self
+    final public function setMethodArguments(array $methodArguments = []): self
     {
-        $this->methodArgs = $methodArgs;
+        $this->methodArguments = $methodArguments;
 
         return $this;
     }
@@ -205,9 +217,44 @@ abstract class Service implements ServiceInterface
      * Get method args.
      * @return array
      */
-    final public function getMethodArgs(): array
+    final public function getMethodArguments(): array
     {
-        return $this->methodArgs;
+        return $this->methodArguments;
+    }
+
+    /**
+     * Get URI.
+     * @return string
+     */
+    final public function getUri(): string
+    {
+        if (!$this->uri) {
+            // get real uri even if alias used
+            $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
+            $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
+
+            $this->uri = sprintf('/%s/%s', $name, $method);
+        }
+
+        return $this->uri;
+    }
+
+    /**
+     * Get URI full.
+     * @return string
+     */
+    final public function getUriFull(): string
+    {
+        if (!$this->uriFull) {
+            $this->uriFull = $this->getUri();
+
+            $methodArguments = $this->app->request->uri->segmentArguments();
+            if (!empty($methodArguments)) {
+                $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
+            }
+        }
+
+        return $this->uriFull;
     }
 
     /**
@@ -245,7 +292,7 @@ abstract class Service implements ServiceInterface
             if ($this->useMainOnly || empty($this->method) || $this->method == ServiceInterface::METHOD_MAIN) {
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], $this->methodArgs);
+                $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call fail::main
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
@@ -257,7 +304,7 @@ abstract class Service implements ServiceInterface
             if ($this->useMainOnly) {
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], $this->methodArgs);
+                $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call fail::main
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
