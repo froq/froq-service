@@ -266,22 +266,22 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Run and return called method's return.
-     * @return any
+     * Run.
+     * @return any That returned from service' target method.
      */
     final public function run()
     {
         $output = null;
 
-        // call external onbefore
+        // call onbefore @external
         $this->app->events->fire('service.before');
 
-        // call init method
+        // call service init method
         if (method_exists($this, ServiceInterface::METHOD_INIT)) {
             $this->{ServiceInterface::METHOD_INIT}();
         }
 
-        // check method
+        // check request method
         if (!$this->isAllowedRequestMethod($this->app->request->method->getName())) {
             $this->app->response->setStatus(405);
             $this->app->response->setContentType('none');
@@ -289,14 +289,13 @@ abstract class Service implements ServiceInterface
             return $output;
         }
 
-        // call internal onbefore
+        // call service onbefore @internal
         if (method_exists($this, ServiceInterface::METHOD_ONBEFORE)) {
             $this->{ServiceInterface::METHOD_ONBEFORE}();
         }
 
-        // site interface
+        // check site or rest interface, call target method
         if ($this->protocol == ServiceInterface::PROTOCOL_SITE) {
-            // always uses main method?
             if ($this->useMainOnly || empty($this->method) || $this->method == ServiceInterface::METHOD_MAIN) {
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
@@ -305,10 +304,7 @@ abstract class Service implements ServiceInterface
                 // call fail::main
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
             }
-        }
-        // rest interface
-        elseif ($this->protocol == ServiceInterface::PROTOCOL_REST) {
-            // always uses main method?
+        } elseif ($this->protocol == ServiceInterface::PROTOCOL_REST) {
             if ($this->useMainOnly) {
                 $output = $this->{ServiceInterface::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
@@ -319,12 +315,12 @@ abstract class Service implements ServiceInterface
             }
         }
 
-        // call internal onafter
+        // call service onafter @internal
         if (method_exists($this, ServiceInterface::METHOD_ONAFTER)) {
             $this->{ServiceInterface::METHOD_ONAFTER}();
         }
 
-        // call external onafter
+        // call onafter @external
         $this->app->events->fire('service.after');
 
         return $output;
