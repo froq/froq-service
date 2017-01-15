@@ -481,7 +481,7 @@ abstract class Service implements ServiceInterface
      * Load ACL.
      * @return void
      */
-    final public function loadAcl()
+    final private function loadAcl()
     {
         $this->acl = new Acl();
 
