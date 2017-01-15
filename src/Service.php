@@ -463,9 +463,9 @@ abstract class Service implements ServiceInterface
 
     /**
      * Load service sprecific configs.
-     * @return self
+     * @return void
      */
-    final private function loadConfig(): self
+    final private function loadConfig()
     {
         $this->config = new Config();
 
@@ -479,9 +479,9 @@ abstract class Service implements ServiceInterface
 
     /**
      * Load ACL.
-     * @return self
+     * @return void
      */
-    final public function loadAcl(): self
+    final public function loadAcl()
     {
         $this->acl = new Acl();
 
@@ -495,9 +495,9 @@ abstract class Service implements ServiceInterface
 
     /**
      * Load validation.
-     * @return self
+     * @return void
      */
-    final private function loadValidation(): self
+    final private function loadValidation()
     {
         $this->validation = new Validation();
 
