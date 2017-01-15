@@ -273,9 +273,6 @@ abstract class Service implements ServiceInterface
     {
         $output = null;
 
-        // call onbefore @external
-        $this->app->events->fire('service.before');
-
         // call service init method
         if (method_exists($this, ServiceInterface::METHOD_INIT)) {
             $this->{ServiceInterface::METHOD_INIT}();
@@ -319,9 +316,6 @@ abstract class Service implements ServiceInterface
         if (method_exists($this, ServiceInterface::METHOD_ONAFTER)) {
             $this->{ServiceInterface::METHOD_ONAFTER}();
         }
-
-        // call onafter @external
-        $this->app->events->fire('service.after');
 
         return $output;
     }
