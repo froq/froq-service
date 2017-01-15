@@ -352,17 +352,13 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check request method is allowed.
-     * @param  string $requestMethod
+     * Is allowed method.
+     * @param  string $method
      * @return bool
      */
-    final public function isAllowedRequestMethod(string $requestMethod): bool
+    final public function isAllowedRequestMethod(string $method): bool
     {
-        if (empty($this->allowedRequestMethods)) {
-            return true;
-        }
-
-        return in_array($requestMethod, $this->allowedRequestMethods);
+        return empty($this->allowedRequestMethods) || in_array($method, $this->allowedRequestMethods);
     }
 
     /**
