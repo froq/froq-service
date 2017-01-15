@@ -26,6 +26,7 @@ namespace Froq\Service;
 use Froq\App;
 use Froq\View\View;
 use Froq\Config\Config;
+use Froq\Acl\Acl;
 use Froq\Validation\Validation;
 use Froq\Util\Traits\GetterTrait;
 
@@ -104,6 +105,12 @@ abstract class Service implements ServiceInterface
     protected $validation;
 
     /**
+     * ACL.
+     * @var Froq\Acl\Acl
+     */
+    protected $acl;
+
+    /**
      * Call only main() method.
      * @var bool
      */
@@ -141,7 +148,8 @@ abstract class Service implements ServiceInterface
      * @param string   $method
      * @param array    $methodArguments
      */
-    final public function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
+    final public function __construct(App $app, string $name = null, string $method = null,
+        array $methodArguments = null)
     {
         $this->app = $app;
 
@@ -149,11 +157,11 @@ abstract class Service implements ServiceInterface
         if ($method) $this->setMethod($method);
         if ($methodArguments) $this->setMethodArguments($methodArguments);
 
-        // load config & validation
         $this->loadConfig();
+        // depend on config
+        $this->loadAcl();
         $this->loadValidation();
 
-        // create view
         if ($this->useView) {
             $this->view = new View($this);
         }
@@ -464,6 +472,22 @@ abstract class Service implements ServiceInterface
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
         if (is_file($file)) {
             $this->config->setData(require($file));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Load ACL.
+     * @return self
+     */
+    final public function loadAcl(): self
+    {
+        $this->acl = new Acl();
+
+        $rules = $this->config->get('acl.rules');
+        if (!empty($rules)) {
+            $this->acl->setRules($rules);
         }
 
         return $this;
