@@ -391,7 +391,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isMainService(): bool
     {
-        return ($this->name == ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX);
+        return $this->name == ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX;
     }
 
     /**
@@ -400,7 +400,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isFailService(): bool
     {
-        return ($this->name == ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX);
+        return $this->name == ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
     }
 
     /**
@@ -409,7 +409,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isDefaultService(): bool
     {
-        return ($this->isMainService() || $this->isFailService());
+        return $this->isMainService() || $this->isFailService();
     }
 
     /**
@@ -418,7 +418,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isSiteProtocol(): bool
     {
-        return ($this->protocol == ServiceInterface::PROTOCOL_SITE);
+        return $this->protocol == ServiceInterface::PROTOCOL_SITE;
     }
 
     /**
@@ -427,7 +427,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isRestProtocol(): bool
     {
-        return ($this->protocol == ServiceInterface::PROTOCOL_SITE);
+        return $this->protocol == ServiceInterface::PROTOCOL_SITE;
     }
 
     /**
