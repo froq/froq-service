@@ -417,7 +417,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check is site protocol.
+     * Is site protocol.
      * @return bool
      */
     final public function isSiteProtocol(): bool
@@ -426,7 +426,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check is REST protocol.
+     * Is REST protocol.
      * @return bool
      */
     final public function isRestProtocol(): bool
@@ -435,7 +435,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check uses view.
+     * Uses view.
      * @return bool
      */
     final public function usesView(): bool
@@ -444,7 +444,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check uses view partials.
+     * Uses view partials.
      * @return bool
      */
     final public function usesViewPartials(): bool
@@ -453,7 +453,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check uses session.
+     * Uses session.
      * @return bool
      */
     final public function usesSession(): bool
@@ -462,7 +462,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Load service sprecific configs.
+     * Load config.
      * @return void
      */
     final private function loadConfig()
