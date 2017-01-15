@@ -153,9 +153,9 @@ abstract class Service implements ServiceInterface
     {
         $this->app = $app;
 
-        if ($name) $this->setName($name);
-        if ($method) $this->setMethod($method);
-        if ($methodArguments) $this->setMethodArguments($methodArguments);
+        $name && $this->setName($name);
+        $method && $this->setMethod($method);
+        $methodArguments && $this->setMethodArguments($methodArguments);
 
         $this->loadConfig();
         // depend on config
@@ -470,8 +470,8 @@ abstract class Service implements ServiceInterface
         $this->config = new Config();
 
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
-        if (is_file($file)) {
-            $this->config->setData(require($file));
+        if (is_file($file) && is_array($data = include $file)) {
+            $this->config->setData($data);
         }
 
         return $this;
