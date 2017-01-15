@@ -417,19 +417,19 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Check is REST protocol.
+     * Check is site protocol.
      * @return bool
      */
-    final public function isRestProtocol(): bool
+    final public function isSiteProtocol(): bool
     {
         return ($this->protocol == ServiceInterface::PROTOCOL_SITE);
     }
 
     /**
-     * Check is site protocol.
+     * Check is REST protocol.
      * @return bool
      */
-    final public function isSiteProtocol(): bool
+    final public function isRestProtocol(): bool
     {
         return ($this->protocol == ServiceInterface::PROTOCOL_SITE);
     }
