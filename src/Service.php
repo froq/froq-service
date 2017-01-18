@@ -40,12 +40,12 @@ abstract class Service implements ServiceInterface
 {
     /**
      * Getter.
-     * @object Froq\Util\Traits\Getter
+     * @object Froq\Util\Traits\GetterTrait
      */
     use GetterTrait;
 
     /**
-     * Froq object.
+     * App.
      * @var Froq\App
      */
     protected $app;
@@ -63,7 +63,7 @@ abstract class Service implements ServiceInterface
     protected $method;
 
     /**
-     * Method args.
+     * Method arguments.
      * @var array
      */
     protected $methodArguments = [];
@@ -81,25 +81,25 @@ abstract class Service implements ServiceInterface
     protected $uriFull;
 
     /**
-     * Config object.
+     * Config.
      * @var Froq\Util\Config
      */
     protected $config;
 
     /**
-     * View object.
+     * View.
      * @var Froq\View\View
      */
     protected $view;
 
     /**
-     * Model object.
+     * Model.
      * @var Froq\Database\Model\Model
      */
     protected $model;
 
     /**
-     * Validation object.
+     * Validation.
      * @var Froq\Validation\Validation
      */
     protected $validation;
@@ -111,7 +111,7 @@ abstract class Service implements ServiceInterface
     protected $acl;
 
     /**
-     * Call only main() method.
+     * Use main only.
      * @var bool
      */
     protected $useMainOnly = false;
@@ -123,7 +123,7 @@ abstract class Service implements ServiceInterface
     protected $useView = false;
 
     /**
-     * Use head/foot files.
+     * Use view partials.
      * @var bool
      */
     protected $useViewPartials = false;
@@ -135,7 +135,7 @@ abstract class Service implements ServiceInterface
     protected $useSession = false;
 
     /**
-     * Request method limiter.
+     * Allowed request methods.
      * @var array
      */
     protected $allowedRequestMethods = [];
@@ -210,7 +210,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Set method args.
+     * Set method arguments.
      * @param  array $methodArguments
      * @return self
      */
@@ -222,7 +222,7 @@ abstract class Service implements ServiceInterface
     }
 
     /**
-     * Get method args.
+     * Get method arguments.
      * @return array
      */
     final public function getMethodArguments(): array
@@ -267,7 +267,7 @@ abstract class Service implements ServiceInterface
 
     /**
      * Run.
-     * @return any That returned from service' target method.
+     * @return any That returned from service's target method.
      */
     final public function run()
     {
@@ -278,7 +278,7 @@ abstract class Service implements ServiceInterface
             $this->{ServiceInterface::METHOD_INIT}();
         }
 
-        // check request method
+        // request method is allowed?
         if (!$this->isAllowedRequestMethod($this->app->request->method->getName())) {
             $this->app->response->setStatus(405);
             $this->app->response->setContentType('none');
@@ -367,6 +367,7 @@ abstract class Service implements ServiceInterface
         }
 
         $this->view->setFile($file);
+        // set header/footer partials if uses
         if ($this->useViewPartials) {
             $this->view->setFileHead();
             $this->view->setFileFoot();
