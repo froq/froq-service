@@ -466,7 +466,7 @@ abstract class Service implements ServiceInterface
         $this->config = new Config();
 
         $file = sprintf('./app/service/%s/config/config.php', $this->name);
-        if (is_file($file) && is_array($data = include $file)) {
+        if (is_file($file) && is_array($data = include($file))) {
             $this->config->setData($data);
         }
 
