@@ -27,6 +27,7 @@ use Froq\App;
 use Froq\Acl\Acl;
 use Froq\View\View;
 use Froq\Config\Config;
+use Froq\Session\Session;
 use Froq\Validation\Validation;
 use Froq\Util\Traits\GetterTrait;
 
