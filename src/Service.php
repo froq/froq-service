@@ -93,6 +93,12 @@ abstract class Service implements ServiceInterface
     protected $view;
 
     /**
+     * Session.
+     * @var Froq\Session\Session
+     */
+    protected $session;
+
+    /**
      * Model.
      * @var Froq\Database\Model\Model
      */
@@ -111,12 +117,6 @@ abstract class Service implements ServiceInterface
     protected $acl;
 
     /**
-     * Use main only.
-     * @var bool
-     */
-    protected $useMainOnly = false;
-
-    /**
      * Use view.
      * @var bool
      */
@@ -133,6 +133,12 @@ abstract class Service implements ServiceInterface
      * @var bool
      */
     protected $useSession = false;
+
+    /**
+     * Use main only.
+     * @var bool
+     */
+    protected $useMainOnly = false;
 
     /**
      * Allowed request methods.
@@ -158,12 +164,15 @@ abstract class Service implements ServiceInterface
         $methodArguments && $this->setMethodArguments($methodArguments);
 
         $this->loadConfig();
-        // depend on config
+        // these work with self.config
         $this->loadAcl();
         $this->loadValidation();
 
         if ($this->useView) {
             $this->view = new View($this);
+        }
+        if ($this->useSession) {
+            $this->session = Session::init($app->config['app.session.cookie']);
         }
     }
 
@@ -488,9 +497,9 @@ abstract class Service implements ServiceInterface
     {
         $this->validation = new Validation();
 
-        $validationRules = $this->config->get('validation.rules');
-        if (!empty($validationRules)) {
-            $this->validation->setRules($validationRules);
+        $rules = $this->config->get('validation.rules');
+        if (!empty($rules)) {
+            $this->validation->setRules($rules);
         }
 
         return $this;
