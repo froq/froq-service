@@ -480,7 +480,7 @@ abstract class Service implements ServiceInterface
      */
     final private function loadAcl()
     {
-        $this->acl = new Acl();
+        $this->acl = new Acl($this);
 
         $rules = $this->config->get('acl.rules');
         if (!empty($rules)) {
