@@ -82,11 +82,25 @@ final class ServiceAdapter
         // detect service name if provided
         $serviceNameAlias = '';
         $serviceName = strtolower($app->request->uri->segment(0, ''));
+        $serviceMethod = null;
 
-        // 0 means name
-        if (!empty($serviceAliases[$serviceName][0])) {
+        if (!empty($serviceAliases[$serviceName][0])) { // 0 means name
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
+        } else if (!empty($serviceAliases['@@'])) { // regexp routes
+            $uriPath = $app->request->uri->getPath();
+            foreach ($serviceAliases['@@'] as $route) {
+                // these are required
+                if (empty($route['pattern']) || empty($route['method'])) {
+                    continue;
+                }
+                if (preg_match($route['pattern'], $uriPath, $match)) {
+                    $serviceName = $route[0];
+                    $serviceMethod = $route['method'];
+                    $methodArguments = array_slice($match, 1);
+                    break;
+                }
+            }
         } else {
             $serviceName = $serviceName ?: ServiceInterface::SERVICE_MAIN;
         }
@@ -115,10 +129,12 @@ final class ServiceAdapter
             if ($this->service->useMainOnly) {
                 $this->serviceMethod = ServiceInterface::METHOD_MAIN;
             } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_SITE) {
-                // from segment
-                $serviceMethod = strtolower($app->request->uri->segment(1, ''));
-                // check alias
-                if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) {
+                if (empty($serviceMethod)) {
+                    // from segment
+                    $serviceMethod = strtolower($app->request->uri->segment(1, ''));
+                }
+
+                if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) { // alias
                     $this->serviceMethod = $this->toServiceMethod($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
                 } elseif ($serviceMethod == '' || $serviceMethod == ServiceInterface::METHOD_MAIN) {
                     $this->serviceMethod = ServiceInterface::METHOD_MAIN;
@@ -157,7 +173,8 @@ final class ServiceAdapter
 
             // set service method args
             if ($this->isServiceMethodExists()) {
-                $methodArguments = $app->request->uri->segmentArguments();
+                $methodArguments = isset($methodArguments)
+                    ? $methodArguments : $app->request->uri->segmentArguments();
                 $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
                     if (!isset($methodArguments[$i])) {
