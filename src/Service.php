@@ -364,10 +364,10 @@ abstract class Service implements ServiceInterface
     /**
      * View.
      * @param  string $file
-     * @param  array  $data
+     * @param  array  $content
      * @return void
      */
-    final public function view(string $file, array $data = null, array $metas = null)
+    final public function view(string $file, array $content = null)
     {
         if (!$this->useView || !$this->view) {
             throw new ServiceException(
@@ -376,8 +376,11 @@ abstract class Service implements ServiceInterface
             );
         }
 
-        // set metas if provided
-        if ($metas) foreach ($metas as $name => $value) {
+        $data = (array) ($content['data'] ?? []);
+        $meta = (array) ($content['meta'] ?? []);
+
+        // set meta if provided
+        if ($meta) foreach ($meta as $name => $value) {
             $this->view->setMeta($name, $value);
         }
 
