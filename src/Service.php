@@ -367,13 +367,18 @@ abstract class Service implements ServiceInterface
      * @param  array  $data
      * @return void
      */
-    final public function view(string $file, array $data = null)
+    final public function view(string $file, array $data = null, array $metas = null)
     {
         if (!$this->useView || !$this->view) {
             throw new ServiceException(
                 "Set service \$useView property as 'true' and be sure " .
                 "that already included 'froq/froq-view' module via Composer."
             );
+        }
+
+        // set metas if provided
+        if ($metas) foreach ($metas as $name => $value) {
+            $this->view->setMeta($name, $value);
         }
 
         $this->view->setFile($file);
