@@ -143,7 +143,7 @@ final class ServiceAdapter
                 }
             } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_REST) {
                 // from request method
-                $this->serviceMethod = strtolower($app->request->method);
+                $this->serviceMethod = strtolower($app->request->method->getName());
             }
 
             // check method
