@@ -173,8 +173,9 @@ final class ServiceAdapter
 
             // set service method args
             if ($this->isServiceMethodExists()) {
-                $methodArguments = isset($methodArguments)
-                    ? $methodArguments : $app->request->uri->segmentArguments();
+                $methodArguments = isset($methodArguments) ? $methodArguments : $app->request->uri->segmentArguments(
+                    $this->service->protocol == ServiceInterface::PROTOCOL_SITE ? 2 : 1
+                );
                 $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
                     if (!isset($methodArguments[$i])) {
