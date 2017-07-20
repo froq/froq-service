@@ -249,9 +249,12 @@ abstract class Service implements ServiceInterface
         if (!$this->uri) {
             // get real uri even if alias used
             $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
-            $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
+            $this->uri = '/'. $name;
 
-            $this->uri = sprintf('/%s/%s', $name, $method);
+            if ($this->protocol == ServiceInterface::PROTOCOL_SITE) {
+                $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
+                $this->uri .= '/'. $method;
+            }
         }
 
         return $this->uri;
@@ -266,7 +269,9 @@ abstract class Service implements ServiceInterface
         if (!$this->uriFull) {
             $this->uriFull = $this->getUri();
 
-            $methodArguments = $this->app->request->uri->segmentArguments();
+            $methodArguments = $this->app->request->uri->segmentArguments(
+                $this->protocol == ServiceInterface::PROTOCOL_SITE ? 2 : 1
+            );
             if (!empty($methodArguments)) {
                 $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
             }
