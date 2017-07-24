@@ -87,15 +87,15 @@ final class ServiceAdapter
         $serviceMethod = null;
 
         $serviceAliases = $app->getConfigValue('app.service.aliases', []);
-        if (!empty($serviceAliases[$serviceName][0])) { // 0 means name
+        if (!empty($serviceAliases[$serviceName][0])) { // 0 => name
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
-        } else if (!empty($serviceAliases['@@'])) { // regexp routes
+        } else if (!empty($serviceAliases['@@@'])) { // regexp routes
             $uriPath = $requestUri->getPath();
-            foreach ($serviceAliases['@@'] as $route) {
+            foreach ($serviceAliases['@@@'] as $route) {
                 // these are required
                 if (empty($route['pattern']) || empty($route['method'])) {
-                    continue;
+                    throw new ServiceException('Both pattern and method are required for RegExp aliases!');
                 }
                 if (preg_match($route['pattern'], $uriPath, $match)) {
                     $serviceName = $route[0];
@@ -193,7 +193,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Check service exists.
+     * Is service exists.
      * @return bool
      */
     final public function isServiceExists(): bool
@@ -206,7 +206,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Check service method exists.
+     * Is service method exists.
      * @return bool
      */
     final public function isServiceMethodExists(): bool
@@ -215,7 +215,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Check service fallback method exists.
+     * Is service fallback method exists.
      * @return bool
      */
     final public function isServiceMethodFallExists(): bool
@@ -273,7 +273,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Prepare service name.
+     * To service name.
      * @param  string $serviceName
      * @return string
      */
@@ -287,7 +287,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Prepare service method.
+     * To service method.
      * @param  string $serviceMethod
      * @return string
      */
@@ -301,7 +301,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Prepare service name.
+     * To service name.
      * @param  string $serviceName
      * @return string
      */
@@ -319,7 +319,7 @@ final class ServiceAdapter
     }
 
     /**
-     * Prepare service class.
+     * To service class.
      * @param  string $serviceName
      * @return string
      */
