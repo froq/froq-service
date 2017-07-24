@@ -178,6 +178,15 @@ abstract class Service implements ServiceInterface
     }
 
     /**
+     * Get app.
+     * @return Froq\App
+     */
+    final public function getApp(): App
+    {
+        return $this->app;
+    }
+
+    /**
      * Set name.
      * @param  string $name
      * @return self
