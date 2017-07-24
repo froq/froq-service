@@ -37,8 +37,40 @@ use Froq\Util\Traits\GetterTrait;
  * @object     Froq\Service\Service
  * @author     Kerem Güneş <k-gun@mail.com>
  */
-abstract class Service implements ServiceInterface
+abstract class Service
 {
+    /**
+     * Namespace.
+     * @const string
+     */
+    const NAMESPACE             = 'Froq\\App\\Service\\';
+
+    /**
+     * Service protocols.
+     * @const string
+     */
+    const PROTOCOL_SITE         = 'site',
+          PROTOCOL_REST         = 'rest';
+
+    /**
+     * Service suffix and names.
+     * @const string
+     */
+    const SERVICE_NAME_SUFFIX   = 'Service',
+          SERVICE_MAIN          = 'Main',
+          SERVICE_FAIL          = 'Fail';
+
+    /**
+     * Service method prefix and names.
+     * @const string
+     */
+    const METHOD_NAME_PREFIX    = 'do',
+          METHOD_INIT           = 'init',
+          METHOD_MAIN           = 'main',
+          METHOD_FALL           = 'fall',
+          METHOD_ONBEFORE       = 'onBefore',
+          METHOD_ONAFTER        = 'onAfter';
+
     /**
      * Getter.
      * @object Froq\Util\Traits\GetterTrait
@@ -173,7 +205,7 @@ abstract class Service implements ServiceInterface
             $this->view = new View($this);
         }
         if ($this->useSession) {
-            $this->session = Session::init($app->config['app.session.cookie']);
+            $this->session = Session::init($app->getConfigValue('app.session.cookie'));
         }
     }
 
@@ -260,7 +292,7 @@ abstract class Service implements ServiceInterface
             $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
             $this->uri = '/'. $name;
 
-            if ($this->protocol == ServiceInterface::PROTOCOL_SITE) {
+            if ($this->protocol == self::PROTOCOL_SITE) {
                 $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
                 $this->uri .= '/'. $method;
             }
@@ -278,8 +310,8 @@ abstract class Service implements ServiceInterface
         if (!$this->uriFull) {
             $this->uriFull = $this->getUri();
 
-            $methodArguments = $this->app->request->uri->segmentArguments(
-                $this->protocol == ServiceInterface::PROTOCOL_SITE ? 2 : 1
+            $methodArguments = $this->app->getRequest()->getUri()->segmentArguments(
+                $this->protocol == self::PROTOCOL_SITE ? 2 : 1
             );
             if (!empty($methodArguments)) {
                 $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
@@ -298,47 +330,46 @@ abstract class Service implements ServiceInterface
         $output = null;
 
         // call service init method
-        if (method_exists($this, ServiceInterface::METHOD_INIT)) {
-            $this->{ServiceInterface::METHOD_INIT}();
+        if (method_exists($this, self::METHOD_INIT)) {
+            $this->{self::METHOD_INIT}();
         }
 
         // request method is allowed?
-        if (!$this->isAllowedRequestMethod($this->app->request->method->getName())) {
-            $this->app->response->setStatus(405);
-            $this->app->response->setContentType('none');
+        if (!$this->isAllowedRequestMethod($this->app->getRequest()->getMethod()->getName())) {
+            $this->app->getResponse()->setStatus(405);
 
             return $output;
         }
 
         // call service onbefore @internal
-        if (method_exists($this, ServiceInterface::METHOD_ONBEFORE)) {
-            $this->{ServiceInterface::METHOD_ONBEFORE}();
+        if (method_exists($this, self::METHOD_ONBEFORE)) {
+            $this->{self::METHOD_ONBEFORE}();
         }
 
         // check site or rest interface, call target method
-        if ($this->protocol == ServiceInterface::PROTOCOL_SITE) {
-            if ($this->useMainOnly || empty($this->method) || $this->method == ServiceInterface::METHOD_MAIN) {
-                $output = $this->{ServiceInterface::METHOD_MAIN}();
+        if ($this->protocol == self::PROTOCOL_SITE) {
+            if ($this->useMainOnly || empty($this->method) || $this->method == self::METHOD_MAIN) {
+                $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call fail::main
-                $output = $this->{ServiceInterface::METHOD_MAIN}();
+                $output = $this->{self::METHOD_MAIN}();
             }
-        } elseif ($this->protocol == ServiceInterface::PROTOCOL_REST) {
+        } elseif ($this->protocol == self::PROTOCOL_REST) {
             if ($this->useMainOnly) {
-                $output = $this->{ServiceInterface::METHOD_MAIN}();
+                $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call fail::main
-                $output = $this->{ServiceInterface::METHOD_MAIN}();
+                $output = $this->{self::METHOD_MAIN}();
             }
         }
 
         // call service onafter @internal
-        if (method_exists($this, ServiceInterface::METHOD_ONAFTER)) {
-            $this->{ServiceInterface::METHOD_ONAFTER}();
+        if (method_exists($this, self::METHOD_ONAFTER)) {
+            $this->{self::METHOD_ONAFTER}();
         }
 
         return $output;
@@ -414,7 +445,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isMainService(): bool
     {
-        return $this->name == ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX;
+        return $this->name == self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX;
     }
 
     /**
@@ -423,7 +454,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isFailService(): bool
     {
-        return $this->name == ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
+        return $this->name == self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX;
     }
 
     /**
@@ -441,7 +472,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isSiteProtocol(): bool
     {
-        return $this->protocol == ServiceInterface::PROTOCOL_SITE;
+        return $this->protocol == self::PROTOCOL_SITE;
     }
 
     /**
@@ -450,7 +481,7 @@ abstract class Service implements ServiceInterface
      */
     final public function isRestProtocol(): bool
     {
-        return $this->protocol == ServiceInterface::PROTOCOL_SITE;
+        return $this->protocol == self::PROTOCOL_SITE;
     }
 
     /**
