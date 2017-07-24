@@ -187,8 +187,7 @@ abstract class Service
      * @param string   $method
      * @param array    $methodArguments
      */
-    final public function __construct(App $app, string $name = null, string $method = null,
-        array $methodArguments = null)
+    final public function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
     {
         $this->app = $app;
 
@@ -205,7 +204,7 @@ abstract class Service
             $this->view = new View($this);
         }
         if ($this->useSession) {
-            $this->session = Session::init($app->getConfigValue('app.session.cookie'));
+            $this->session = Session::init($this->app->getConfigValue('app.session.cookie'));
         }
     }
 
