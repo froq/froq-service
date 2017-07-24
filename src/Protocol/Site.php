@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Froq\Service\Protocol;
 
-use Froq\Service\{Service, ServiceInterface};
+use Froq\Service\Service;
 
 /**
  * @package    Froq
@@ -37,7 +37,7 @@ abstract class Site extends Service
      * Service protocol.
      * @var string
      */
-    protected $protocol = ServiceInterface::PROTOCOL_SITE;
+    protected $protocol = Service::PROTOCOL_SITE;
 
     /**
      * Main.
