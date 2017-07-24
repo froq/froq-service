@@ -77,18 +77,21 @@ final class ServiceAdapter
     {
         $this->app = $app;
 
-        $serviceAliases = $app->config->get('app.service.aliases', []);
+        $request = $this->app->getRequest();
+        $requestUri = $request->getUri();
+        $requestMethod = $request->getMethod();
 
         // detect service name if provided
         $serviceNameAlias = '';
-        $serviceName = strtolower($app->request->uri->segment(0, ''));
+        $serviceName = strtolower($requestUri->segment(0, ''));
         $serviceMethod = null;
 
+        $serviceAliases = $app->getConfigValue('app.service.aliases', []);
         if (!empty($serviceAliases[$serviceName][0])) { // 0 means name
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
         } else if (!empty($serviceAliases['@@'])) { // regexp routes
-            $uriPath = $app->request->uri->getPath();
+            $uriPath = $requestUri->getPath();
             foreach ($serviceAliases['@@'] as $route) {
                 // these are required
                 if (empty($route['pattern']) || empty($route['method'])) {
@@ -102,7 +105,7 @@ final class ServiceAdapter
                 }
             }
         } else {
-            $serviceName = $serviceName ?: ServiceInterface::SERVICE_MAIN;
+            $serviceName = $serviceName ?: Service::SERVICE_MAIN;
         }
 
         $this->serviceName = $this->toServiceName($serviceName);
@@ -116,8 +119,8 @@ final class ServiceAdapter
                 'text' => sprintf('Service not found [%s]', $this->serviceName),
             ]);
 
-            $this->serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
-            $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+            $this->serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
+            $this->serviceMethod = Service::METHOD_MAIN;
             $this->serviceFile   = $this->toServiceFile($this->serviceName);
             $this->serviceClass  = $this->toServiceClass($this->serviceName);
         }
@@ -127,30 +130,30 @@ final class ServiceAdapter
         if (!$this->service->isFailService()) {
             // detect service method
             if ($this->service->useMainOnly) {
-                $this->serviceMethod = ServiceInterface::METHOD_MAIN;
-            } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_SITE) {
+                $this->serviceMethod = Service::METHOD_MAIN;
+            } elseif ($this->service->protocol == Service::PROTOCOL_SITE) {
                 if (empty($serviceMethod)) {
                     // from segment
-                    $serviceMethod = strtolower($app->request->uri->segment(1, ''));
+                    $serviceMethod = strtolower($requestUri->segment(1, ''));
                 }
 
                 if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) { // alias
                     $this->serviceMethod = $this->toServiceMethod($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
-                } elseif ($serviceMethod == '' || $serviceMethod == ServiceInterface::METHOD_MAIN) {
-                    $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+                } elseif ($serviceMethod == '' || $serviceMethod == Service::METHOD_MAIN) {
+                    $this->serviceMethod = Service::METHOD_MAIN;
                 } else {
                     $this->serviceMethod = $this->toServiceMethod($serviceMethod);
                 }
-            } elseif ($this->service->protocol == ServiceInterface::PROTOCOL_REST) {
+            } elseif ($this->service->protocol == Service::PROTOCOL_REST) {
                 // from request method
-                $this->serviceMethod = strtolower($app->request->method->getName());
+                $this->serviceMethod = strtolower($requestMethod->getName());
             }
 
             // check method
             if (!$this->isServiceMethodExists()) {
                 // check fallback method
                 if ($this->isServiceMethodFallExists()) {
-                    $this->serviceMethod = ServiceInterface::METHOD_FALL;
+                    $this->serviceMethod = Service::METHOD_FALL;
                 } else {
                     set_global('app.service.fail', [
                         'code' => 404,
@@ -159,8 +162,8 @@ final class ServiceAdapter
                     ]);
 
                     // overwrite
-                    $this->serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
-                    $this->serviceMethod = ServiceInterface::METHOD_MAIN;
+                    $this->serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
+                    $this->serviceMethod = Service::METHOD_MAIN;
                     $this->serviceFile   = $this->toServiceFile($this->serviceName);
                     $this->serviceClass  = $this->toServiceClass($this->serviceName);
 
@@ -173,8 +176,8 @@ final class ServiceAdapter
 
             // set service method args
             if ($this->isServiceMethodExists()) {
-                $methodArguments = isset($methodArguments) ? $methodArguments : $app->request->uri->segmentArguments(
-                    $this->service->protocol == ServiceInterface::PROTOCOL_SITE ? 2 : 1
+                $methodArguments = isset($methodArguments) ? $methodArguments : $requestUri->segmentArguments(
+                    $this->service->protocol == Service::PROTOCOL_SITE ? 2 : 1
                 );
                 $ref = new \ReflectionMethod($this->serviceClass, $this->serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
@@ -217,14 +220,14 @@ final class ServiceAdapter
      */
     final public function isServiceMethodFallExists(): bool
     {
-        return ($this->service && method_exists($this->service, ServiceInterface::METHOD_FALL));
+        return ($this->service && method_exists($this->service, Service::METHOD_FALL));
     }
 
     /**
      * Create service.
-     * @return Froq\Service\ServiceInterface
+     * @return Froq\Service\Service
      */
-    final private function createService(): ServiceInterface
+    final private function createService(): Service
     {
         return new $this->serviceClass($this->app, $this->serviceName, $this->serviceMethod);
     }
@@ -232,9 +235,9 @@ final class ServiceAdapter
     /**
      * Get service.
      *
-     * @return Froq\Service\ServiceInterface
+     * @return Froq\Service\Service
      */
-    final public function getService(): ServiceInterface
+    final public function getService(): Service
     {
         return $this->service;
     }
@@ -280,7 +283,7 @@ final class ServiceAdapter
             return ucfirst($match[1]);
         }, ucfirst($serviceName));
 
-        return sprintf('%s%s', $serviceName, ServiceInterface::SERVICE_NAME_SUFFIX);
+        return sprintf('%s%s', $serviceName, Service::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -294,7 +297,7 @@ final class ServiceAdapter
             return ucfirst($match[1]);
         }, ucfirst($serviceMethod));
 
-        return sprintf('%s%s', ServiceInterface::METHOD_NAME_PREFIX, $serviceMethod);
+        return sprintf('%s%s', Service::METHOD_NAME_PREFIX, $serviceMethod);
     }
 
     /**
@@ -306,8 +309,8 @@ final class ServiceAdapter
     {
         $serviceFile = sprintf('./app/service/%s/%s.php', $serviceName, $serviceName);
         if (!is_file($serviceFile) && (
-            $serviceName == ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX ||
-            $serviceName == ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX
+            $serviceName == Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX ||
+            $serviceName == Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX
         )) {
             $serviceFile = sprintf('./app/service/default/%s/%s.php', $serviceName, $serviceName);
         }
@@ -322,6 +325,6 @@ final class ServiceAdapter
      */
     final public function toServiceClass(string $serviceName): string
     {
-        return sprintf('%s%s', ServiceInterface::NAMESPACE, $serviceName);
+        return sprintf('%s%s', Service::NAMESPACE, $serviceName);
     }
 }
