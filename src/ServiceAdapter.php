@@ -86,7 +86,7 @@ final class ServiceAdapter
         $serviceName = strtolower($requestUri->segment(0, ''));
         $serviceMethod = null;
 
-        $serviceAliases = $app->getConfigValue('app.service.aliases', []);
+        $serviceAliases = $app->configValue('app.service.aliases', []);
         if (!empty($serviceAliases[$serviceName][0])) { // 0 => name
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0];
