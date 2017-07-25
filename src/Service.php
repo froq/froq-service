@@ -309,7 +309,7 @@ abstract class Service
         if (!$this->uriFull) {
             $this->uriFull = $this->getUri();
 
-            $methodArguments = $this->app->getRequest()->getUri()->segmentArguments(
+            $methodArguments = $this->app->getRequest()->uri()->segmentArguments(
                 $this->protocol == self::PROTOCOL_SITE ? 2 : 1
             );
             if (!empty($methodArguments)) {
@@ -334,7 +334,7 @@ abstract class Service
         }
 
         // request method is allowed?
-        if (!$this->isAllowedRequestMethod($this->app->getRequest()->getMethod()->getName())) {
+        if (!$this->isAllowedRequestMethod($this->app->getRequest()->method()->getName())) {
             $this->app->getResponse()->setStatus(405);
         }
 

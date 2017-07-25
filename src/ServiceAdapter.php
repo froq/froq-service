@@ -78,8 +78,8 @@ final class ServiceAdapter
         $this->app = $app;
 
         $request = $this->app->getRequest();
-        $requestUri = $request->getUri();
-        $requestMethod = $request->getMethod();
+        $requestUri = $request->uri();
+        $requestMethod = $request->method();
 
         // detect service name if provided
         $serviceNameAlias = '';
