@@ -335,7 +335,7 @@ abstract class Service
 
         // request method is allowed?
         if (!$this->isAllowedRequestMethod($this->app->request()->method()->getName())) {
-            $this->app->getResponse()->setStatus(405);
+            $this->app->response()->setStatus(405);
         }
 
         // call service onbefore @internal
