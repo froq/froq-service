@@ -8,14 +8,13 @@
         {"name": "Kerem Güneş", "email": "k-gun@mail.com"}
     ],
     "require": {
-        "php": "^7.0",
-        "froq/froq": "~1.0",
-        "froq/froq-util": "~1.0",
-        "froq/froq-config": "~1.0",
-        "froq/froq-session": "~1.0",
-        "froq/froq-validation": "~1.0",
-        "froq/froq-acl": "~1.0",
-        "froq/froq-view": "~1.0"
+        "php": "^7.1",
+        "froq/froq": "~2.0",
+        "froq/froq-acl": "~2.0",
+        "froq/froq-view": "~2.0",
+        "froq/froq-config": "~2.0",
+        "froq/froq-session": "~2.0",
+        "froq/froq-validation": "~2.0"
     },
     "autoload": {
         "classmap": ["src/"]
