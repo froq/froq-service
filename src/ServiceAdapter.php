@@ -77,7 +77,7 @@ final class ServiceAdapter
     {
         $this->app = $app;
 
-        $request = $this->app->getRequest();
+        $request = $this->app->request();
         $requestUri = $request->uri();
         $requestMethod = $request->method();
 
