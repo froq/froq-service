@@ -21,23 +21,23 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service\Protocol;
+namespace Froq\Service\Service;
 
 use Froq\Service\Service;
 
 /**
  * @package    Froq
- * @subpackage Froq\Service\Protocol
- * @object     Froq\Service\Protocol\Rest
+ * @subpackage Froq\Service
+ * @object     Froq\Service\Service\Site
  * @author     Kerem Güneş <k-gun@mail.com>
  */
 abstract class Site extends Service
 {
     /**
-     * Service protocol.
+     * Type.
      * @var string
      */
-    protected $protocol = Service::PROTOCOL_SITE;
+    protected $type = Service::TYPE_SITE;
 
     /**
      * Main.

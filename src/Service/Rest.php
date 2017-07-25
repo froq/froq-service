@@ -21,23 +21,23 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service\Protocol;
+namespace Froq\Service\Service;
 
 use Froq\Service\Service;
 
 /**
  * @package    Froq
- * @subpackage Froq\Service\Protocol
- * @object     Froq\Service\Protocol\Rest
+ * @subpackage Froq\Service
+ * @object     Froq\Service\Service\Rest
  * @author     Kerem Güneş <k-gun@mail.com>
  */
 abstract class Rest extends Service
 {
     /**
-     * Service protocol.
+     * Type.
      * @var string
      */
-    protected $protocol = Service::PROTOCOL_REST;
+    protected $type = Service::TYPE_REST;
 
     /**
      * Main.
