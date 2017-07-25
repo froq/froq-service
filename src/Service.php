@@ -29,7 +29,6 @@ use Froq\View\View;
 use Froq\Config\Config;
 use Froq\Session\Session;
 use Froq\Validation\Validation;
-use Froq\Util\Traits\GetterTrait;
 
 /**
  * @package    Froq
@@ -46,11 +45,11 @@ abstract class Service
     const NAMESPACE             = 'Froq\\App\\Service\\';
 
     /**
-     * Service protocols.
+     * Service types.
      * @const string
      */
-    const PROTOCOL_SITE         = 'site',
-          PROTOCOL_REST         = 'rest';
+    const TYPE_SITE             = 'site',
+          TYPE_REST             = 'rest';
 
     /**
      * Service suffix and names.
@@ -70,12 +69,6 @@ abstract class Service
           METHOD_FALL           = 'fall',
           METHOD_ONBEFORE       = 'onBefore',
           METHOD_ONAFTER        = 'onAfter';
-
-    /**
-     * Getter.
-     * @object Froq\Util\Traits\GetterTrait
-     */
-    use GetterTrait;
 
     /**
      * App.
@@ -102,13 +95,13 @@ abstract class Service
     protected $methodArguments = [];
 
     /**
-     * URI.
+     * Uri.
      * @var string
      */
     protected $uri;
 
     /**
-     * URI full.
+     * Uri full.
      * @var string
      */
     protected $uriFull;
@@ -144,7 +137,7 @@ abstract class Service
     protected $validation;
 
     /**
-     * ACL.
+     * Acl.
      * @var Froq\Acl\Acl
      */
     protected $acl;
@@ -181,13 +174,12 @@ abstract class Service
 
     /**
      * Constructor.
-     *
      * @param Froq\App $app
      * @param string   $name
      * @param string   $method
      * @param array    $methodArguments
      */
-    final public function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
+    public final function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
     {
         $this->app = $app;
 
@@ -212,7 +204,7 @@ abstract class Service
      * Get app.
      * @return Froq\App
      */
-    final public function getApp(): App
+    public final function getApp(): App
     {
         return $this->app;
     }
@@ -222,7 +214,7 @@ abstract class Service
      * @param  string $name
      * @return self
      */
-    final public function setName(string $name): self
+    public final function setName(string $name): self
     {
         $this->name = $name;
 
@@ -233,7 +225,7 @@ abstract class Service
      * Get name.
      * @return string
      */
-    final public function getName(): string
+    public final function getName(): string
     {
         return $this->name;
     }
@@ -243,7 +235,7 @@ abstract class Service
      * @param  string $method
      * @return self
      */
-    final public function setMethod(string $method): self
+    public final function setMethod(string $method): self
     {
         $this->method = $method;
 
@@ -254,7 +246,7 @@ abstract class Service
      * Get method.
      * @return string
      */
-    final public function getMethod(): string
+    public final function getMethod(): string
     {
         return $this->method;
     }
@@ -264,7 +256,7 @@ abstract class Service
      * @param  array $methodArguments
      * @return self
      */
-    final public function setMethodArguments(array $methodArguments = []): self
+    public final function setMethodArguments(array $methodArguments = []): self
     {
         $this->methodArguments = $methodArguments;
 
@@ -275,23 +267,23 @@ abstract class Service
      * Get method arguments.
      * @return array
      */
-    final public function getMethodArguments(): array
+    public final function getMethodArguments(): array
     {
         return $this->methodArguments;
     }
 
     /**
-     * Get URI.
+     * Get uri.
      * @return string
      */
-    final public function getUri(): string
+    public final function getUri(): string
     {
-        if (!$this->uri) {
+        if ($this->uri == null) {
             // get real uri even if alias used
             $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
             $this->uri = '/'. $name;
 
-            if ($this->protocol == self::PROTOCOL_SITE) {
+            if ($this->type == self::TYPE_SITE) {
                 $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
                 $this->uri .= '/'. $method;
             }
@@ -301,16 +293,16 @@ abstract class Service
     }
 
     /**
-     * Get URI full.
+     * Get uri full.
      * @return string
      */
-    final public function getUriFull(): string
+    public final function getUriFull(): string
     {
-        if (!$this->uriFull) {
+        if ($this->uriFull == null) {
             $this->uriFull = $this->getUri();
 
             $methodArguments = $this->app->request()->uri()->segmentArguments(
-                $this->protocol == self::PROTOCOL_SITE ? 2 : 1
+                $this->type == self::TYPE_SITE ? 2 : 1
             );
             if (!empty($methodArguments)) {
                 $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
@@ -321,10 +313,185 @@ abstract class Service
     }
 
     /**
+     * Set allowed request methods.
+     * @param  array $allowedRequestMethods
+     * @return self
+     */
+    public final function setAllowedRequestMethods(array $allowedRequestMethods): self
+    {
+        $this->allowedRequestMethods = array_map('strtoupper', $allowedRequestMethods);
+
+        return $this;
+    }
+
+    /**
+     * Get allowed request methods.
+     * @return array
+     */
+    public final function getAllowedRequestMethods(): array
+    {
+        return $this->allowedRequestMethods;
+    }
+
+    /**
+     * Is allowed method.
+     * @param  string $method
+     * @return bool
+     */
+    public final function isAllowedRequestMethod(string $method): bool
+    {
+        return empty($this->allowedRequestMethods) || in_array($method, $this->allowedRequestMethods);
+    }
+
+    /**
+     * Get type.
+     * @return string
+     */
+    public final function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * Get config.
+     * @return Froq\Config\Config
+     */
+    public final function getConfig(): Config
+    {
+        return $this->config;
+    }
+
+    /**
+     * Get view.
+     * @return Froq\View\View
+     */
+    public final function getView(): ?View
+    {
+        return $this->view;
+    }
+
+    /**
+     * Get session.
+     * @return Froq\Session\Session
+     */
+    public final function getSession(): ?Session
+    {
+        return $this->session;
+    }
+
+    /**
+     * Get model.
+     * @return Froq\Database\Model\Model Not included in composer.json, so return type is not set here.
+     */
+    public final function getModel()
+    {
+        return $this->model;
+    }
+
+    /**
+     * Get acl.
+     * @return Froq\Acl\Acl
+     */
+    public final function getAcl(): Acl
+    {
+        return $this->acl;
+    }
+
+    /**
+     * Get validation.
+     * @return Froq\Validation\Validation
+     */
+    public final function getValidation(): Validation
+    {
+        return $this->validation;
+    }
+
+    /**
+     * Is site.
+     * @return bool
+     */
+    public final function isSite(): bool
+    {
+        return $this->type == self::TYPE_SITE;
+    }
+
+    /**
+     * Is rest.
+     * @return bool
+     */
+    public final function isRest(): bool
+    {
+        return $this->type == self::TYPE_REST;
+    }
+
+    /**
+     * Is main service.
+     * @return bool
+     */
+    public final function isMainService(): bool
+    {
+        return $this->name == self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX;
+    }
+
+    /**
+     * Is fail service.
+     * @return bool
+     */
+    public final function isFailService(): bool
+    {
+        return $this->name == self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX;
+    }
+
+    /**
+     * Is default service.
+     * @return bool
+     */
+    public final function isDefaultService(): bool
+    {
+        return $this->isMainService() || $this->isFailService();
+    }
+
+    /**
+     * Uses view.
+     * @return bool
+     */
+    public final function usesView(): bool
+    {
+        return $this->useView == true;
+    }
+
+    /**
+     * Uses view partials.
+     * @return bool
+     */
+    public final function usesViewPartials(): bool
+    {
+        return $this->useViewPartials == true;
+    }
+
+    /**
+     * Uses session.
+     * @return bool
+     */
+    public final function usesSession(): bool
+    {
+        return $this->useSession == true;
+    }
+
+    /**
+     * Uses main only.
+     * @return bool
+     */
+    public function usesMainOnly(): bool
+    {
+        return $this->useMainOnly == true;
+    }
+
+    /**
      * Run.
      * @return any That returned from service's target method.
      */
-    final public function run()
+    public final function run()
     {
         $output = null;
 
@@ -344,7 +511,7 @@ abstract class Service
         }
 
         // check site or rest interface, call target method
-        if ($this->protocol == self::PROTOCOL_SITE) {
+        if ($this->type == self::TYPE_SITE) {
             if ($this->useMainOnly || empty($this->method) || $this->method == self::METHOD_MAIN) {
                 $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
@@ -353,7 +520,7 @@ abstract class Service
                 // call fail::main
                 $output = $this->{self::METHOD_MAIN}();
             }
-        } elseif ($this->protocol == self::PROTOCOL_REST) {
+        } elseif ($this->type == self::TYPE_REST) {
             if ($this->useMainOnly) {
                 $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
@@ -373,45 +540,14 @@ abstract class Service
     }
 
     /**
-     * Set allowed request methods.
-     * @param  array $allowedRequestMethods
-     * @return self
-     */
-    final public function setAllowedRequestMethods(array $allowedRequestMethods): self
-    {
-        $this->allowedRequestMethods = array_map('strtoupper', $allowedRequestMethods);
-
-        return $this;
-    }
-
-    /**
-     * Get allowed request methods.
-     * @return array
-     */
-    final public function getAllowedRequestMethods(): array
-    {
-        return $this->allowedRequestMethods;
-    }
-
-    /**
-     * Is allowed method.
-     * @param  string $method
-     * @return bool
-     */
-    final public function isAllowedRequestMethod(string $method): bool
-    {
-        return empty($this->allowedRequestMethods) || in_array($method, $this->allowedRequestMethods);
-    }
-
-    /**
      * View.
      * @param  string $file
      * @param  array  $content
      * @return void
      */
-    final public function view(string $file, array $content = null)
+    public final function view(string $file, array $content = null): void
     {
-        if (!$this->useView || !$this->view) {
+        if (!$this->useView) {
             throw new ServiceException(
                 "Set service \$useView property as 'true' and be sure " .
                 "that already included 'froq/froq-view' module via Composer."
@@ -422,11 +558,12 @@ abstract class Service
         $meta = (array) ($content['meta'] ?? []);
 
         // set meta if provided
-        if ($meta) foreach ($meta as $name => $value) {
+        if ($meta) { foreach ($meta as $name => $value) {
             $this->view->setMeta($name, $value);
-        }
+        }}
 
         $this->view->setFile($file);
+
         // set header/footer partials if uses
         if ($this->useViewPartials) {
             $this->view->setFileHead();
@@ -437,98 +574,24 @@ abstract class Service
     }
 
     /**
-     * Is main service.
-     * @return bool
-     */
-    final public function isMainService(): bool
-    {
-        return $this->name == self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX;
-    }
-
-    /**
-     * Is fail service.
-     * @return bool
-     */
-    final public function isFailService(): bool
-    {
-        return $this->name == self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX;
-    }
-
-    /**
-     * Is default service.
-     * @return bool
-     */
-    final public function isDefaultService(): bool
-    {
-        return $this->isMainService() || $this->isFailService();
-    }
-
-    /**
-     * Is site protocol.
-     * @return bool
-     */
-    final public function isSiteProtocol(): bool
-    {
-        return $this->protocol == self::PROTOCOL_SITE;
-    }
-
-    /**
-     * Is REST protocol.
-     * @return bool
-     */
-    final public function isRestProtocol(): bool
-    {
-        return $this->protocol == self::PROTOCOL_SITE;
-    }
-
-    /**
-     * Uses view.
-     * @return bool
-     */
-    final public function usesView(): bool
-    {
-        return ($this->useView == true);
-    }
-
-    /**
-     * Uses view partials.
-     * @return bool
-     */
-    final public function usesViewPartials(): bool
-    {
-        return ($this->useViewPartials == true);
-    }
-
-    /**
-     * Uses session.
-     * @return bool
-     */
-    final public function usesSession(): bool
-    {
-        return ($this->useSession == true);
-    }
-
-    /**
      * Load config.
      * @return void
      */
-    final private function loadConfig()
+    private final function loadConfig(): void
     {
         $this->config = new Config();
 
-        $file = sprintf('./app/service/%s/config/config.php', $this->name);
+        $file = sprintf('%s/app/service/%s/config/config.php', APP_DIR, $this->name);
         if (is_file($file) && is_array($data = include($file))) {
             $this->config->setData($data);
         }
-
-        return $this;
     }
 
     /**
-     * Load ACL.
+     * Load acl.
      * @return void
      */
-    final private function loadAcl()
+    private final function loadAcl(): void
     {
         $this->acl = new Acl($this);
 
@@ -536,15 +599,13 @@ abstract class Service
         if (!empty($rules)) {
             $this->acl->setRules($rules);
         }
-
-        return $this;
     }
 
     /**
      * Load validation.
      * @return void
      */
-    final private function loadValidation()
+    private final function loadValidation(): void
     {
         $this->validation = new Validation();
 
@@ -552,7 +613,5 @@ abstract class Service
         if (!empty($rules)) {
             $this->validation->setRules($rules);
         }
-
-        return $this;
     }
 }
