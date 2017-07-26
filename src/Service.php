@@ -42,33 +42,33 @@ abstract class Service
      * Namespace.
      * @const string
      */
-    const NAMESPACE             = 'Froq\\App\\Service\\';
+    public const NAMESPACE             = 'Froq\\App\\Service\\';
 
     /**
      * Service types.
      * @const string
      */
-    const TYPE_SITE             = 'site',
-          TYPE_REST             = 'rest';
+    public const TYPE_SITE             = 'site',
+                 TYPE_REST             = 'rest';
 
     /**
      * Service suffix and names.
      * @const string
      */
-    const SERVICE_NAME_SUFFIX   = 'Service',
-          SERVICE_MAIN          = 'Main',
-          SERVICE_FAIL          = 'Fail';
+    public const SERVICE_NAME_SUFFIX   = 'Service',
+                 SERVICE_MAIN          = 'Main',
+                 SERVICE_FAIL          = 'Fail';
 
     /**
      * Service method prefix and names.
      * @const string
      */
-    const METHOD_NAME_PREFIX    = 'do',
-          METHOD_INIT           = 'init',
-          METHOD_MAIN           = 'main',
-          METHOD_FALL           = 'fall',
-          METHOD_ONBEFORE       = 'onBefore',
-          METHOD_ONAFTER        = 'onAfter';
+    public const METHOD_NAME_PREFIX    = 'do',
+                 METHOD_INIT           = 'init',
+                 METHOD_MAIN           = 'main',
+                 METHOD_FALL           = 'fall',
+                 METHOD_ONBEFORE       = 'onBefore',
+                 METHOD_ONAFTER        = 'onAfter';
 
     /**
      * App.
@@ -108,7 +108,7 @@ abstract class Service
 
     /**
      * Config.
-     * @var Froq\Util\Config
+     * @var Froq\Config\Config
      */
     protected $config;
 
@@ -179,7 +179,8 @@ abstract class Service
      * @param string   $method
      * @param array    $methodArguments
      */
-    public final function __construct(App $app, string $name = null, string $method = null, array $methodArguments = null)
+    public final function __construct(App $app, string $name = null, string $method = null,
+        array $methodArguments = null)
     {
         $this->app = $app;
 
@@ -517,7 +518,7 @@ abstract class Service
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
-                // call fail::main
+                // call FailService::main()
                 $output = $this->{self::METHOD_MAIN}();
             }
         } elseif ($this->type == self::TYPE_REST) {
@@ -526,7 +527,7 @@ abstract class Service
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
-                // call fail::main
+                // call FailService::main()
                 $output = $this->{self::METHOD_MAIN}();
             }
         }
