@@ -36,7 +36,8 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
     /**
      * Create.
      * @param  Froq\App $app
-     * @return Froq\Service\Service
+     * @return ?Froq\Service\Service
+     * @throws Froq\Service\ServiceException
      */
     public static final function create(App $app): ?Service
     {
