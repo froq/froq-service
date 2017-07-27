@@ -51,12 +51,19 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodArguments = null;
-
         $serviceAliases = $app->configValue('app.service.aliases', []);
-        if (!empty($serviceAliases[$serviceName][0])) { // 0 => name
+
+        // main
+        if (empty($serviceName)) {
+            $serviceName = Service::SERVICE_MAIN;
+        }
+        // aliases
+        elseif (!empty($serviceAliases[$serviceName][0])) {
             $serviceNameAlias = $serviceName;
-            $serviceName = $serviceAliases[$serviceName][0];
-        } else if (!empty($serviceAliases['@@@'])) { // regexp routes
+            $serviceName = $serviceAliases[$serviceName][0]; // 0 => name, methods => ...
+        }
+        // regexp routes
+        else if (!empty($serviceAliases['@@@'])) {
             $uriPath = $requestUri->getPath();
             foreach ($serviceAliases['@@@'] as $route) {
                 // these are required
@@ -70,8 +77,6 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
                     break;
                 }
             }
-        } else {
-            $serviceName = $serviceName ?: Service::SERVICE_MAIN;
         }
 
         $serviceName = self::toServiceName($serviceName);
@@ -206,7 +211,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
         if (strpos($serviceName, '-')) {
             $serviceName = preg_replace_callback('~-([a-z])~i', function ($match) {
                 return ucfirst($match[1]);
-            }, $setName);
+            }, $serviceName);
         }
 
         return sprintf('%s%s', $serviceName, Service::SERVICE_NAME_SUFFIX);
