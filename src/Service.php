@@ -224,9 +224,9 @@ abstract class Service
 
     /**
      * Get name.
-     * @return string
+     * @return ?string
      */
-    public final function getName(): string
+    public final function getName(): ?string
     {
         return $this->name;
     }
@@ -245,9 +245,9 @@ abstract class Service
 
     /**
      * Get method.
-     * @return string
+     * @return ?string
      */
-    public final function getMethod(): string
+    public final function getMethod(): ?string
     {
         return $this->method;
     }
@@ -335,7 +335,7 @@ abstract class Service
     }
 
     /**
-     * Is allowed method.
+     * Is allowed request method.
      * @param  string $method
      * @return bool
      */
@@ -364,7 +364,7 @@ abstract class Service
 
     /**
      * Get view.
-     * @return Froq\View\View
+     * @return ?Froq\View\View
      */
     public final function getView(): ?View
     {
@@ -373,7 +373,7 @@ abstract class Service
 
     /**
      * Get session.
-     * @return Froq\Session\Session
+     * @return ?Froq\Session\Session
      */
     public final function getSession(): ?Session
     {
@@ -431,7 +431,7 @@ abstract class Service
      */
     public final function isMainService(): bool
     {
-        return $this->name == self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX;
+        return $this->name == (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -440,7 +440,7 @@ abstract class Service
      */
     public final function isFailService(): bool
     {
-        return $this->name == self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX;
+        return $this->name == (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -490,7 +490,7 @@ abstract class Service
 
     /**
      * Run.
-     * @return any That returned from service's target method.
+     * @return any That returned from service's target (called) method.
      */
     public final function run()
     {
@@ -506,7 +506,7 @@ abstract class Service
             $this->app->response()->setStatus(405);
         }
 
-        // call service onbefore @internal
+        // call service onbefore
         if (method_exists($this, self::METHOD_ONBEFORE)) {
             $this->{self::METHOD_ONBEFORE}();
         }
@@ -532,7 +532,7 @@ abstract class Service
             }
         }
 
-        // call service onafter @internal
+        // call service onafter
         if (method_exists($this, self::METHOD_ONAFTER)) {
             $this->{self::METHOD_ONAFTER}();
         }
@@ -559,9 +559,11 @@ abstract class Service
         $meta = (array) ($content['meta'] ?? []);
 
         // set meta if provided
-        if ($meta) { foreach ($meta as $name => $value) {
-            $this->view->setMeta($name, $value);
-        }}
+        if (!empty($meta)) {
+            foreach ($meta as $name => $value) {
+                $this->view->setMeta($name, $value);
+            }
+        }
 
         $this->view->setFile($file);
 
