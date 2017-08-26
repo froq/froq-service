@@ -42,6 +42,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
     public static final function create(App $app): ?Service
     {
         $request = $app->request();
+        $response = $app->response();
         $requestUri = $request->uri();
         $requestMethod = $request->method();
 
@@ -52,6 +53,11 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
         $serviceMethod = null;
         $serviceMethodArguments = null;
         $serviceAliases = $app->configValue('app.service.aliases', []);
+
+        // redirect main method
+        if ($requestUri->segment(1) == Service::METHOD_MAIN) {
+            return $response->redirect('/'. $serviceName)->end();
+        }
 
         // main
         if (empty($serviceName)) {
