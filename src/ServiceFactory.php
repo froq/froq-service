@@ -96,6 +96,9 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
                 'text' => sprintf('Service not found [%s]', $serviceName),
             ]);
 
+            // set response status
+            $response->setStatus(404);
+
             $serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
             $serviceMethod = Service::METHOD_MAIN;
             $serviceFile   = self::toServiceFile($serviceName);
@@ -136,6 +139,9 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
                         'code' => 404,
                         'text' => sprintf('Service method not found [%s::%s()]', $serviceName, $serviceMethod)
                     ]);
+
+                    // set response status
+                    $response->setStatus(404);
 
                     // overwrite
                     $serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
