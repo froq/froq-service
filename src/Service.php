@@ -544,9 +544,10 @@ abstract class Service
      * View.
      * @param  string $file
      * @param  array  $content
+     * @param  bool   $useViewPartials
      * @return void
      */
-    public final function view(string $file, array $content = null): void
+    public final function view(string $file, array $content = null, bool $useViewPartials = null): void
     {
         if (!$this->useView) {
             throw new ServiceException(
@@ -567,8 +568,11 @@ abstract class Service
 
         $this->view->setFile($file);
 
+        // override on runtime calls
+        $useViewPartials = $useViewPartials ?? $this->useViewPartials;
+
         // set header/footer partials if uses
-        if ($this->useViewPartials) {
+        if ($useViewPartials) {
             $this->view->setFileHead();
             $this->view->setFileFoot();
         }
