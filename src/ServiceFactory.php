@@ -146,7 +146,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
                     // set response status
                     $response->setStatus(404);
 
-                    // overwrite
+                    // override
                     $serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
                     $serviceMethod = Service::METHOD_MAIN;
                     $serviceFile   = self::toServiceFile($serviceName);
@@ -187,7 +187,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
      */
     private static final function isServiceExists(string $serviceFile, string $serviceClass): bool
     {
-        if (!is_file($serviceFile)) {
+        if (!file_exists($serviceFile)) {
             return false;
         }
 
@@ -257,10 +257,9 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
     private static final function toServiceFile(string $serviceName): string
     {
         $serviceFile = sprintf('%s/app/service/%s/%s.php', APP_DIR, $serviceName, $serviceName);
-        if (!is_file($serviceFile) && (
+        if (!file_exists($serviceFile) && (
             $serviceName == (Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX)
-                || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX)
-        )) {
+                || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX))) {
             $serviceFile = sprintf('%s/app/service/default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
         }
 

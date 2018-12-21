@@ -187,9 +187,9 @@ abstract class Service
     {
         $this->app = $app;
 
-        $name && $this->setName($name);
-        $method && $this->setMethod($method);
-        $methodArguments && $this->setMethodArguments($methodArguments);
+        if ($name != null) $this->setName($name);
+        if ($method != null) $this->setMethod($method);
+        if ($methodArguments != null) $this->setMethodArguments($methodArguments);
 
         $this->loadConfig();
         // these work with self.config
@@ -216,13 +216,11 @@ abstract class Service
     /**
      * Set name.
      * @param  string $name
-     * @return self
+     * @return void
      */
-    public final function setName(string $name): self
+    public final function setName(string $name): void
     {
         $this->name = $name;
-
-        return $this;
     }
 
     /**
@@ -237,13 +235,11 @@ abstract class Service
     /**
      * Set method.
      * @param  string $method
-     * @return self
+     * @return void
      */
-    public final function setMethod(string $method): self
+    public final function setMethod(string $method): void
     {
         $this->method = $method;
-
-        return $this;
     }
 
     /**
@@ -258,13 +254,11 @@ abstract class Service
     /**
      * Set method arguments.
      * @param  array $methodArguments
-     * @return self
+     * @return void
      */
-    public final function setMethodArguments(array $methodArguments = []): self
+    public final function setMethodArguments(array $methodArguments = []): void
     {
         $this->methodArguments = $methodArguments;
-
-        return $this;
     }
 
     /**
@@ -319,13 +313,11 @@ abstract class Service
     /**
      * Set allowed request methods.
      * @param  array $allowedRequestMethods
-     * @return self
+     * @return void
      */
-    public final function setAllowedRequestMethods(array $allowedRequestMethods): self
+    public final function setAllowedRequestMethods(array $allowedRequestMethods): void
     {
         $this->allowedRequestMethods = array_map('strtoupper', $allowedRequestMethods);
-
-        return $this;
     }
 
     /**
@@ -461,7 +453,7 @@ abstract class Service
      */
     public final function usesView(): bool
     {
-        return $this->useView == true;
+        return $this->useView === true;
     }
 
     /**
@@ -470,7 +462,7 @@ abstract class Service
      */
     public final function usesViewPartials(): bool
     {
-        return $this->useViewPartials == true;
+        return $this->useViewPartials === true;
     }
 
     /**
@@ -479,7 +471,7 @@ abstract class Service
      */
     public final function usesSession(): bool
     {
-        return $this->useSession == true;
+        return $this->useSession === true;
     }
 
     /**
@@ -488,7 +480,7 @@ abstract class Service
      */
     public function usesMainOnly(): bool
     {
-        return $this->useMainOnly == true;
+        return $this->useMainOnly === true;
     }
 
     /**
@@ -592,7 +584,7 @@ abstract class Service
         $this->config = new Config();
 
         $file = sprintf('%s/app/service/%s/config/config.php', APP_DIR, $this->name);
-        if (is_file($file) && is_array($data = include($file))) {
+        if (file_exists($file) && is_array($data = include $file)) {
             $this->config->setData($data);
         }
     }
