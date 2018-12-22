@@ -281,7 +281,7 @@ abstract class Service
             $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
             $this->uri = '/'. $name;
 
-            if ($this->type == self::TYPE_SITE) {
+            if ($this->type === self::TYPE_SITE) {
                 $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
                 $this->uri .= '/'. $method;
             }
@@ -300,7 +300,7 @@ abstract class Service
             $this->uriFull = $this->getUri();
 
             $methodArguments = $this->app->request()->uri()->segmentArguments(
-                $this->type == self::TYPE_SITE ? 2 : 1
+                $this->type === self::TYPE_SITE ? 2 : 1
             );
             if (!empty($methodArguments)) {
                 $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
@@ -408,7 +408,7 @@ abstract class Service
      */
     public final function isSite(): bool
     {
-        return $this->type == self::TYPE_SITE;
+        return $this->type === self::TYPE_SITE;
     }
 
     /**
@@ -417,7 +417,7 @@ abstract class Service
      */
     public final function isRest(): bool
     {
-        return $this->type == self::TYPE_REST;
+        return $this->type === self::TYPE_REST;
     }
 
     /**
@@ -426,7 +426,7 @@ abstract class Service
      */
     public final function isMainService(): bool
     {
-        return $this->name == (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
+        return $this->name === (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -435,7 +435,7 @@ abstract class Service
      */
     public final function isFailService(): bool
     {
-        return $this->name == (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
+        return $this->name === (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -507,7 +507,7 @@ abstract class Service
         }
 
         // check site or rest interface, call target method
-        if ($this->type == self::TYPE_SITE) {
+        if ($this->type === self::TYPE_SITE) {
             if ($this->useMainOnly || empty($this->method) || $this->method == self::METHOD_MAIN) {
                 $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
@@ -516,7 +516,7 @@ abstract class Service
                 // call FailService::main()
                 $output = $this->{self::METHOD_MAIN}();
             }
-        } elseif ($this->type == self::TYPE_REST) {
+        } elseif ($this->type === self::TYPE_REST) {
             if ($this->useMainOnly) {
                 $output = $this->{self::METHOD_MAIN}();
             } elseif (method_exists($this, $this->method)) {
