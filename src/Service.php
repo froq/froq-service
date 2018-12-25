@@ -70,8 +70,8 @@ abstract class Service
                  METHOD_INIT           = 'init',
                  METHOD_MAIN           = 'main',
                  METHOD_FALL           = 'fall',
-                 METHOD_ONBEFORE       = 'onBefore',
-                 METHOD_ONAFTER        = 'onAfter';
+                 METHOD_ON_BEFORE      = 'onBefore',
+                 METHOD_ON_AFTER       = 'onAfter';
 
     /**
      * App.
@@ -281,7 +281,7 @@ abstract class Service
             $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
             $this->uri = '/'. $name;
 
-            if ($this->type === self::TYPE_SITE) {
+            if ($this->isSite()) {
                 $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
                 $this->uri .= '/'. $method;
             }
@@ -299,9 +299,7 @@ abstract class Service
         if ($this->uriFull == null) {
             $this->uriFull = $this->getUri();
 
-            $methodArguments = $this->app->request()->uri()->segmentArguments(
-                $this->type === self::TYPE_SITE ? 2 : 1
-            );
+            $methodArguments = $this->app->request()->uri()->segmentArguments($this->isSite() ? 2 : 1);
             if (!empty($methodArguments)) {
                 $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
             }
@@ -408,7 +406,7 @@ abstract class Service
      */
     public final function isSite(): bool
     {
-        return $this->type === self::TYPE_SITE;
+        return $this->type == self::TYPE_SITE;
     }
 
     /**
@@ -417,7 +415,7 @@ abstract class Service
      */
     public final function isRest(): bool
     {
-        return $this->type === self::TYPE_REST;
+        return $this->type == self::TYPE_REST;
     }
 
     /**
@@ -426,7 +424,7 @@ abstract class Service
      */
     public final function isMainService(): bool
     {
-        return $this->name === (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
+        return $this->name == (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -435,7 +433,7 @@ abstract class Service
      */
     public final function isFailService(): bool
     {
-        return $this->name === (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
+        return $this->name == (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
     }
 
     /**
@@ -489,47 +487,63 @@ abstract class Service
      */
     public final function run()
     {
+        $request = $this->app->request();
+        $response = $this->app->response();
+
+        [$methodMain, $methodInit, $methodOnBefore, $methodOnAfter] = [
+            self::METHOD_MAIN, self::METHOD_INIT,
+            self::METHOD_ON_BEFORE, self::METHOD_ON_AFTER,
+        ];
+
+        // redirect "service/main" to "service/" (301 Moved Permanently)
+        @ [$name, $method] = $request->uri()->segments();
+        if ($method != null && strtolower($method) == $methodMain) {
+            $response->redirect('/'. strtolower($name), 301);
+            $response->end();
+            return;
+        }
+
         $output = null;
 
         // call service init method
-        if (method_exists($this, self::METHOD_INIT)) {
-            $this->{self::METHOD_INIT}();
+        if (method_exists($this, $methodInit)) {
+            $this->$methodInit();
         }
 
         // request method is allowed?
-        if (!$this->isAllowedRequestMethod($this->app->request()->method()->getName())) {
-            $this->app->response()->setStatus(405);
+        if (!$this->isAllowedRequestMethod($request->method()->getName())) {
+            $response->setStatus(405);
         }
 
         // call service onbefore
-        if (method_exists($this, self::METHOD_ONBEFORE)) {
-            $this->{self::METHOD_ONBEFORE}();
+        if (method_exists($this, $methodOnBefore)) {
+            $this->$methodOnBefore();
         }
 
         // check site or rest interface, call target method
-        if ($this->type === self::TYPE_SITE) {
-            if ($this->useMainOnly || empty($this->method) || $this->method == self::METHOD_MAIN) {
-                $output = $this->{self::METHOD_MAIN}();
+        if ($this->isSite()) {
+            if ($this->useMainOnly || empty($this->method) || $this->method == $methodMain) {
+                $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call FailService::main()
-                $output = $this->{self::METHOD_MAIN}();
+                $output = $this->$methodMain();
             }
-        } elseif ($this->type === self::TYPE_REST) {
+        } elseif ($this->isRest()) {
             if ($this->useMainOnly) {
-                $output = $this->{self::METHOD_MAIN}();
+                $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], $this->methodArguments);
             } else {
                 // call FailService::main()
-                $output = $this->{self::METHOD_MAIN}();
+                $output = $this->$methodMain();
             }
         }
 
         // call service onafter
-        if (method_exists($this, self::METHOD_ONAFTER)) {
-            $this->{self::METHOD_ONAFTER}();
+        if (method_exists($this, $methodOnAfter)) {
+            $this->$methodOnAfter();
         }
 
         return $output;
