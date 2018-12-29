@@ -71,8 +71,8 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
             $uriPath = $requestUri->getPath();
             foreach ($serviceAliases['~~'] as $route) {
                 // these are required
-                if (empty($route['pattern']) || empty($route['method'])) {
-                    throw new ServiceException('Both pattern and method are required for RegExp aliases!');
+                if (empty($route['method']) || empty($route['pattern'])) {
+                    throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases!");
                 }
                 if (preg_match($route['pattern'], $uriPath, $match)) {
                     $serviceName = $route[0];
@@ -156,8 +156,8 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
 
             // set service method args
             if (self::isServiceMethodExists($service, $serviceMethod)) {
-                $serviceMethodArguments = isset($serviceMethodArguments)
-                    ? $serviceMethodArguments : $requestUri->segmentArguments($service->isSite() ? 2 : 1);
+                $serviceMethodArguments = isset($serviceMethodArguments) ? $serviceMethodArguments
+                    : $requestUri->segmentArguments($service->isSite() ? 2 : 1);
 
                 $ref = new \ReflectionMethod($serviceClass, $serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {

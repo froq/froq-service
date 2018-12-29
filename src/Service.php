@@ -95,7 +95,7 @@ abstract class Service
      * Method arguments.
      * @var array
      */
-    protected $methodArguments = [];
+    protected $methodArguments;
 
     /**
      * Uri.
@@ -191,8 +191,8 @@ abstract class Service
         if ($method != null) $this->setMethod($method);
         if ($methodArguments != null) $this->setMethodArguments($methodArguments);
 
+        // these methods work only with self config
         $this->loadConfig();
-        // these work with self.config
         $this->loadAcl();
         $this->loadValidation();
 
@@ -257,16 +257,16 @@ abstract class Service
      * @param  array $methodArguments
      * @return void
      */
-    public final function setMethodArguments(array $methodArguments = []): void
+    public final function setMethodArguments(array $methodArguments): void
     {
         $this->methodArguments = $methodArguments;
     }
 
     /**
      * Get method arguments.
-     * @return array
+     * @return ?array
      */
-    public final function getMethodArguments(): array
+    public final function getMethodArguments(): ?array
     {
         return $this->methodArguments;
     }
@@ -288,7 +288,7 @@ abstract class Service
             }
         }
 
-        return $this->uri;
+        return rtrim($this->uri, '/');
     }
 
     /**
@@ -300,13 +300,13 @@ abstract class Service
         if ($this->uriFull == null) {
             $this->uriFull = $this->getUri();
 
-            $methodArguments = $this->app->request()->uri()->segmentArguments($this->isSite() ? 2 : 1);
-            if (!empty($methodArguments)) {
-                $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $methodArguments));
+            $arguments = $this->app->request()->uri()->segmentArguments($this->isSite() ? 2 : 1);
+            if (!empty($arguments)) {
+                $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $arguments));
             }
         }
 
-        return $this->uriFull;
+        return rtrim($this->uriFull, '/');
     }
 
     /**
@@ -526,7 +526,7 @@ abstract class Service
             if ($this->useMainOnly || empty($this->method) || $this->method == $methodMain) {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], $this->methodArguments);
+                $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
             } else {
                 // call FailService::main()
                 $output = $this->$methodMain();
@@ -535,7 +535,7 @@ abstract class Service
             if ($this->useMainOnly) {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], $this->methodArguments);
+                $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
             } else {
                 // call FailService::main()
                 $output = $this->$methodMain();
