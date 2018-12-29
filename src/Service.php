@@ -201,7 +201,7 @@ abstract class Service
         }
 
         if ($this->useSession) {
-            $this->session = Session::init($this->app->configValue('app.session'));
+            $this->session = Session::init($this->app->configValue('session'));
         }
     }
 

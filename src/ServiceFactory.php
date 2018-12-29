@@ -55,7 +55,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodArguments = null;
-        $serviceAliases = $app->configValue('app.service.aliases', []);
+        $serviceAliases = $app->configValue('service.aliases', []);
 
         // main
         if (empty($serviceName)) {
@@ -67,9 +67,9 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
             $serviceName = $serviceAliases[$serviceName][0]; // 0 => name, methods => ...
         }
         // regexp routes
-        else if (!empty($serviceAliases['@@@'])) {
+        else if (!empty($serviceAliases['~~'])) {
             $uriPath = $requestUri->getPath();
-            foreach ($serviceAliases['@@@'] as $route) {
+            foreach ($serviceAliases['~~'] as $route) {
                 // these are required
                 if (empty($route['pattern']) || empty($route['method'])) {
                     throw new ServiceException('Both pattern and method are required for RegExp aliases!');
