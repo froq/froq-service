@@ -14,7 +14,8 @@
         "froq/froq-view": "~3.0",
         "froq/froq-config": "~3.0",
         "froq/froq-session": "~3.0",
-        "froq/froq-validation": "~3.0"
+        "froq/froq-validation": "~3.0",
+        "froq/froq-util": "~3.0"
     },
     "autoload": {
         "classmap": ["src/"]
