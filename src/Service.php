@@ -199,8 +199,9 @@ abstract class Service
         if ($this->useView) {
             $this->view = new View($this);
         }
+
         if ($this->useSession) {
-            $this->session = Session::init($this->app->configValue('app.session.cookie'));
+            $this->session = Session::init($this->app->configValue('app.session'));
         }
     }
 
