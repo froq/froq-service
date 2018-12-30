@@ -560,10 +560,8 @@ abstract class Service
     public final function view(string $file, array $content = null, bool $useViewPartials = null): void
     {
         if (!$this->useView) {
-            throw new ServiceException(
-                "Set service \$useView property as 'true' and be sure " .
-                "that already included 'froq/froq-view' module via Composer."
-            );
+            throw new ServiceException("Set \$useView = true in service and be sure that already ".
+                "included 'froq/froq-view' module via Composer");
         }
 
         $data = (array) ($content['data'] ?? []);

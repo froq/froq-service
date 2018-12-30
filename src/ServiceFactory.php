@@ -72,7 +72,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
             foreach ($serviceAliases['~~'] as $route) {
                 // these are required
                 if (empty($route['method']) || empty($route['pattern'])) {
-                    throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases!");
+                    throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
                 }
                 if (preg_match($route['pattern'], $uriPath, $match)) {
                     $serviceName = $route[0];
