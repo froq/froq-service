@@ -45,5 +45,5 @@ abstract class Site extends Service
     /**
      * Main.
      */
-    abstract public function main();
+    public abstract function main();
 }

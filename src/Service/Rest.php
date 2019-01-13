@@ -45,13 +45,13 @@ abstract class Rest extends Service
     /**
      * Main.
      */
-    abstract public function main();
+    public abstract function main();
 
     /**
      * Default REST methods.
      */
-    abstract public function get();
-    abstract public function post();
-    abstract public function put();
-    abstract public function delete();
+    public abstract function get();
+    public abstract function post();
+    public abstract function put();
+    public abstract function delete();
 }
