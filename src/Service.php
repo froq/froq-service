@@ -477,7 +477,7 @@ abstract class Service
      * Uses main only.
      * @return bool
      */
-    public function usesMainOnly(): bool
+    public final function usesMainOnly(): bool
     {
         return $this->useMainOnly === true;
     }
