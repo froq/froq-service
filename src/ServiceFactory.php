@@ -219,7 +219,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
     {
         $serviceName = ucfirst($serviceName);
         if (strpos($serviceName, '-')) {
-            $serviceName = preg_replace_callback('~-([a-z])~i', function ($match) {
+            $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
                 return ucfirst($match[1]);
             }, $serviceName);
         }
@@ -236,7 +236,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
     {
         $serviceMethod = ucfirst($serviceMethod);
         if (strpos($serviceMethod, '-')) {
-            $serviceMethod = preg_replace_callback('~-([a-z])~i', function ($match) {
+            $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
                 return ucfirst($match[1]);
             }, $serviceMethod);
         }
