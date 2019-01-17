@@ -497,14 +497,12 @@ abstract class Service
         ];
 
         // redirect "service/main" to "service/" (301 Moved Permanently)
-        @ [$name, $method] = $request->uri()->segments();
-        if ($method != null && strtolower($method) == $methodMain) {
-            $response->redirect('/'. strtolower($name), 301);
+        @ [$serviceName, $serviceMethod] = $request->uri()->segments();
+        if ($serviceMethod != null && strtolower($serviceMethod) == $methodMain) {
+            $response->redirect('/'. strtolower($serviceName), 301);
             $response->end();
             return;
         }
-
-        $output = null;
 
         // call service init method
         if (method_exists($this, $methodInit)) {
@@ -521,24 +519,24 @@ abstract class Service
             $this->$methodOnBefore();
         }
 
-        // check site or rest interface, call target method
+        $output = null;
+
+        // check site or rest interface, call the target method
         if ($this->isSite()) {
-            if ($this->useMainOnly || empty($this->method) || $this->method == $methodMain) {
+            if ($this->useMainOnly || $this->method == $methodMain || $this->method === '') {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
             } else {
-                // call FailService::main()
-                $output = $this->$methodMain();
+                $output = $this->$methodMain(); // calls FailService::main() actually
             }
         } elseif ($this->isRest()) {
             if ($this->useMainOnly) {
                 $output = $this->$methodMain();
-            } elseif (method_exists($this, $this->method)) {
+            } elseif (in_array($this->method, ['get', 'post', 'put', 'delete'])) {
                 $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
             } else {
-                // call FailService::main()
-                $output = $this->$methodMain();
+                $output = $this->$methodMain(); // calls FailService::main() actually
             }
         }
 
