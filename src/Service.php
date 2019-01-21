@@ -177,6 +177,12 @@ abstract class Service
     protected $allowedRequestMethods = [];
 
     /**
+     * Run.
+     * @var bool
+     */
+    private static $run = false;
+
+    /**
      * Constructor.
      * @param Froq\App $app
      * @param string   $name
@@ -489,6 +495,13 @@ abstract class Service
      */
     public final function run()
     {
+        // run once
+        if (self::$run) {
+            throw new ServiceException("You cannot call Service::run() anymore, it's already called ".
+                "in App::run() once");
+        }
+        self::$run = true;
+
         $request = $this->app->request();
         $response = $this->app->response();
 
