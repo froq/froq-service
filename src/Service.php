@@ -492,6 +492,7 @@ abstract class Service
     /**
      * Run.
      * @return any That returned from service's target (called) method.
+     * @throws Froq\Service\ServiceException
      */
     public final function run()
     {
@@ -568,6 +569,7 @@ abstract class Service
      * @param  array  $content
      * @param  bool   $useViewPartials
      * @return void
+     * @throws Froq\Service\ServiceException
      */
     public final function view(string $file, array $content = null, bool $useViewPartials = null): void
     {
