@@ -33,6 +33,7 @@ use Froq\Service\Service;
  * @subpackage Froq\Service
  * @object     Froq\Service\Service\Rest
  * @author     Kerem Güneş <k-gun@mail.com>
+ * @since      1.0
  */
 abstract class Rest extends Service
 {

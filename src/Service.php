@@ -38,6 +38,7 @@ use Froq\Validation\Validation;
  * @subpackage Froq\Service
  * @object     Froq\Service\Service
  * @author     Kerem Güneş <k-gun@mail.com>
+ * @since      1.0
  */
 abstract class Service
 {

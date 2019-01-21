@@ -33,6 +33,7 @@ use Froq\App;
  * @subpackage Froq\Service
  * @object     Froq\Service\ServiceFactory
  * @author     Kerem Güneş <k-gun@mail.com>
+ * @since      1.0
  */
 abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
 {

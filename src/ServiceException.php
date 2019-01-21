@@ -31,6 +31,7 @@ namespace Froq\Service;
  * @subpackage Froq\Service
  * @object     Froq\Service\ServiceException
  * @author     Kerem Güneş <k-gun@mail.com>
+ * @since      1.0
  */
 final class ServiceException extends \Exception
 {}
