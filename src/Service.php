@@ -538,7 +538,7 @@ abstract class Service
 
         // check site or rest interface, call the target method
         if ($this->isSite()) {
-            if ($this->useMainOnly || $this->method == $methodMain || $this->method === '') {
+            if ($this->useMainOnly || $this->method == $methodMain || $this->method == '') {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
