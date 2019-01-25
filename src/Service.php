@@ -32,6 +32,7 @@ use Froq\View\View;
 use Froq\Config\Config;
 use Froq\Session\Session;
 use Froq\Validation\Validation;
+use Froq\Util\Traits\OneRunTrait;
 
 /**
  * @package    Froq
@@ -42,6 +43,12 @@ use Froq\Validation\Validation;
  */
 abstract class Service
 {
+    /**
+     * One run trait.
+     * @object Froq\Util\Traits\OneRunTrait
+     */
+    use OneRunTrait;
+
     /**
      * Namespace.
      * @const string
@@ -175,12 +182,6 @@ abstract class Service
      * @var array
      */
     protected $allowedRequestMethods = [];
-
-    /**
-     * Run.
-     * @var bool
-     */
-    private static $run = false;
 
     /**
      * Constructor.
@@ -497,11 +498,8 @@ abstract class Service
     public final function run()
     {
         // run once
-        if (self::$run) {
-            throw new ServiceException("You cannot call Service::run() anymore, it's already called ".
-                "in App::run() once");
-        }
-        self::$run = true;
+        $this->___checkRun(new ServiceException("You cannot call Service::run() anymore, it's ".
+            "already called in App::run() once"));
 
         $request = $this->app->request();
         $response = $this->app->response();
