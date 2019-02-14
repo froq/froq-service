@@ -24,14 +24,14 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service;
+namespace froq\service;
 
 /**
- * @package    Froq
- * @subpackage Froq\Service
- * @object     Froq\Service\ServiceException
- * @author     Kerem Güneş <k-gun@mail.com>
- * @since      1.0
+ * Service exception.
+ * @package froq\service
+ * @object  froq\service\ServiceException
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @since   1.0
  */
 final class ServiceException extends \Exception
 {}

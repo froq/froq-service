@@ -24,24 +24,24 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service;
+namespace froq\service;
 
-use Froq\App;
+use froq\App;
 
 /**
- * @package    Froq
- * @subpackage Froq\Service
- * @object     Froq\Service\ServiceFactory
- * @author     Kerem Güneş <k-gun@mail.com>
- * @since      1.0
+ * Service factory.
+ * @package froq\service
+ * @object  froq\service\ServiceFactory
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @since   1.0
  */
-abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
+final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 {
     /**
      * Create.
-     * @param  Froq\App $app
-     * @return ?Froq\Service\Service
-     * @throws Froq\Service\ServiceException
+     * @param  froq\App $app
+     * @return ?froq\service\Service
+     * @throws froq\service\ServiceException
      */
     public static final function create(App $app): ?Service
     {
@@ -192,7 +192,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
 
     /**
      * Is service method exists.
-     * @param  Froq\Service\Service $service
+     * @param  froq\service\Service $service
      * @param  string               $serviceMethod
      * @return bool
      */
@@ -203,7 +203,7 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
 
     /**
      * Is service fall method exists.
-     * @param  Froq\Service\Service $service
+     * @param  froq\service\Service $service
      * @return bool
      */
     private static final function isServiceFallMethodExists(?Service $service): bool
@@ -269,6 +269,6 @@ abstract /* static final (fuck fuck fuuuck!!) */ class ServiceFactory
      */
     private static final function toServiceClass(string $serviceName): string
     {
-        return sprintf('%s%s', Service::NAMESPACE, $serviceName);
+        return sprintf('%s\\%s', Service::NAMESPACE, $serviceName);
     }
 }

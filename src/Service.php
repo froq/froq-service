@@ -24,28 +24,28 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service;
+namespace froq\service;
 
-use Froq\App;
-use Froq\Acl\Acl;
-use Froq\View\View;
-use Froq\Config\Config;
-use Froq\Session\Session;
-use Froq\Validation\Validation;
-use Froq\Util\Traits\OneRunTrait;
+use froq\App;
+use froq\acl\Acl;
+use froq\view\View;
+use froq\config\Config;
+use froq\session\Session;
+use froq\validation\Validation;
+use froq\util\traits\OneRunTrait;
 
 /**
- * @package    Froq
- * @subpackage Froq\Service
- * @object     Froq\Service\Service
- * @author     Kerem Güneş <k-gun@mail.com>
- * @since      1.0
+ * Service.
+ * @package froq\service
+ * @object  froq\service\Service
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @since   1.0
  */
 abstract class Service
 {
     /**
      * One run trait.
-     * @object Froq\Util\Traits\OneRunTrait
+     * @object froq\util\traits\OneRunTrait
      */
     use OneRunTrait;
 
@@ -53,7 +53,7 @@ abstract class Service
      * Namespace.
      * @const string
      */
-    public const NAMESPACE             = 'Froq\\App\\Service\\';
+    public const NAMESPACE             = 'froq\\app\\service';
 
     /**
      * Service types.
@@ -83,7 +83,7 @@ abstract class Service
 
     /**
      * App.
-     * @var Froq\App
+     * @var froq\App
      */
     protected $app;
 
@@ -119,37 +119,37 @@ abstract class Service
 
     /**
      * Config.
-     * @var Froq\Config\Config
+     * @var froq\config\Config
      */
     protected $config;
 
     /**
      * View.
-     * @var Froq\View\View
+     * @var froq\view\View
      */
     protected $view;
 
     /**
      * Session.
-     * @var Froq\Session\Session
+     * @var froq\session\Session
      */
     protected $session;
 
     /**
      * Model.
-     * @var Froq\Database\Model\Model
+     * @var froq\database\model\Model
      */
     protected $model;
 
     /**
      * Validation.
-     * @var Froq\Validation\Validation
+     * @var froq\validation\Validation
      */
     protected $validation;
 
     /**
      * Acl.
-     * @var Froq\Acl\Acl
+     * @var froq\acl\Acl
      */
     protected $acl;
 
@@ -185,7 +185,7 @@ abstract class Service
 
     /**
      * Constructor.
-     * @param Froq\App $app
+     * @param froq\App $app
      * @param string   $name
      * @param string   $method
      * @param array    $methodArguments
@@ -215,7 +215,7 @@ abstract class Service
 
     /**
      * Get app.
-     * @return Froq\App
+     * @return froq\App
      */
     public final function getApp(): App
     {
@@ -357,7 +357,7 @@ abstract class Service
 
     /**
      * Get config.
-     * @return Froq\Config\Config
+     * @return froq\config\Config
      */
     public final function getConfig(): Config
     {
@@ -366,7 +366,7 @@ abstract class Service
 
     /**
      * Get view.
-     * @return ?Froq\View\View
+     * @return ?froq\view\View
      */
     public final function getView(): ?View
     {
@@ -375,7 +375,7 @@ abstract class Service
 
     /**
      * Get session.
-     * @return ?Froq\Session\Session
+     * @return ?froq\session\Session
      */
     public final function getSession(): ?Session
     {
@@ -384,7 +384,8 @@ abstract class Service
 
     /**
      * Get model.
-     * @return Froq\Database\Model\Model Not included in composer.json, so return type is not set here.
+     * @note   Model Not included in composer.json, so return type is not set here.
+     * @return froq\database\model\Model
      */
     public final function getModel()
     {
@@ -393,7 +394,7 @@ abstract class Service
 
     /**
      * Get acl.
-     * @return Froq\Acl\Acl
+     * @return froq\acl\Acl
      */
     public final function getAcl(): Acl
     {
@@ -402,7 +403,7 @@ abstract class Service
 
     /**
      * Get validation.
-     * @return Froq\Validation\Validation
+     * @return froq\validation\Validation
      */
     public final function getValidation(): Validation
     {
@@ -493,7 +494,7 @@ abstract class Service
     /**
      * Run.
      * @return any That returned from service's target (called) method.
-     * @throws Froq\Service\ServiceException
+     * @throws froq\service\ServiceException
      */
     public final function run()
     {
@@ -567,7 +568,7 @@ abstract class Service
      * @param  array  $content
      * @param  bool   $useViewPartials
      * @return void
-     * @throws Froq\Service\ServiceException
+     * @throws froq\service\ServiceException
      */
     public final function view(string $file, array $content = null, bool $useViewPartials = null): void
     {

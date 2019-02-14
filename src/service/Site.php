@@ -24,35 +24,27 @@
  */
 declare(strict_types=1);
 
-namespace Froq\Service\Service;
+namespace froq\service\service;
 
-use Froq\Service\Service;
+use froq\service\Service;
 
 /**
- * @package    Froq
- * @subpackage Froq\Service
- * @object     Froq\Service\Service\Rest
- * @author     Kerem Güneş <k-gun@mail.com>
- * @since      1.0
+ * Site.
+ * @package froq\service\service
+ * @object  froq\service\service\Site
+ * @author  Kerem Güneş <k-gun@mail.com>
+ * @since   1.0
  */
-abstract class Rest extends Service
+abstract class Site extends Service
 {
     /**
      * Type.
      * @var string
      */
-    protected $type = Service::TYPE_REST;
+    protected $type = Service::TYPE_SITE;
 
     /**
      * Main.
      */
     public abstract function main();
-
-    /**
-     * Default REST methods.
-     */
-    public abstract function get();
-    public abstract function post();
-    public abstract function put();
-    public abstract function delete();
 }
