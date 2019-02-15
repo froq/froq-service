@@ -629,7 +629,7 @@ abstract class Service
         }
 
         $file = sprintf('%s/app/service/%s/model/model.php', APP_DIR, $this->name);
-        if (!!file_exists($file)) {
+        if (!file_exists($file)) {
             throw new ServiceException("Cannot load {$this->name} model, model file app/service/{$this->name}".
                 "/model/model.php not found");
         }
