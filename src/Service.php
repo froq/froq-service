@@ -629,15 +629,16 @@ abstract class Service
         }
 
         $file = sprintf('%s/app/service/%s/model/model.php', APP_DIR, $this->name);
-        if (!file_exists($file)) {
-            throw new ServiceException("Cannot load model, model file {$file} not found");
+        if (!!file_exists($file)) {
+            throw new ServiceException("Cannot load {$this->name} model, model file app/service/{$this->name}".
+                "/model/model.php not found");
         }
 
-        require $file;
-
         // FooService => FooModel
-        $class = sprintf('froq\\app\\database\\%sModel', substr($this->name, 0,
-            -strlen(self::SERVICE_NAME_SUFFIX)));
+        $class = sprintf('froq\\app\\database\\%sModel', substr($this->name, 0, -strlen(self::SERVICE_NAME_SUFFIX)));
+        if (!class_exists($class)) {
+            throw new ServiceException("Cannot load {$this->name} model, model class {$class} not found");
+        }
 
         $this->model = new $class($this);
     }
