@@ -154,6 +154,12 @@ abstract class Service
     protected $acl;
 
     /**
+     * Use model.
+     * @var bool
+     */
+    protected $useModel = false;
+
+    /**
      * Use view.
      * @var bool
      */
@@ -203,11 +209,13 @@ abstract class Service
         $this->loadConfig();
         $this->loadAcl();
         $this->loadValidation();
+        if ($this->useModel) {
+            $this->loadModel();
+        }
 
         if ($this->useView) {
             $this->view = new View($this);
         }
-
         if ($this->useSession) {
             $this->session = Session::init($this->app->configValue('session'));
         }
@@ -456,12 +464,21 @@ abstract class Service
     }
 
     /**
+     * Uses model.
+     * @return bool
+     */
+    public final function usesModel(): bool
+    {
+        return $this->useModel == true;
+    }
+
+    /**
      * Uses view.
      * @return bool
      */
     public final function usesView(): bool
     {
-        return $this->useView === true;
+        return $this->useView == true;
     }
 
     /**
@@ -470,7 +487,7 @@ abstract class Service
      */
     public final function usesViewPartials(): bool
     {
-        return $this->useViewPartials === true;
+        return $this->useViewPartials == true;
     }
 
     /**
@@ -479,7 +496,7 @@ abstract class Service
      */
     public final function usesSession(): bool
     {
-        return $this->useSession === true;
+        return $this->useSession == true;
     }
 
     /**
@@ -488,7 +505,7 @@ abstract class Service
      */
     public final function usesMainOnly(): bool
     {
-        return $this->useMainOnly === true;
+        return $this->useMainOnly == true;
     }
 
     /**
@@ -599,6 +616,30 @@ abstract class Service
         }
 
         $this->view->displayAll($data);
+    }
+
+    /**
+     * Load model.
+     * @return void
+     */
+    public final function loadModel(): void
+    {
+        if ($this->model != null) {
+            return;
+        }
+
+        $file = sprintf('%s/app/service/%s/model/model.php', APP_DIR, $this->name);
+        if (!file_exists($file)) {
+            throw new ServiceException("Cannot load model, model file {$file} not found");
+        }
+
+        require $file;
+
+        // FooService => FooModel
+        $class = sprintf('froq\\app\\database\\%sModel', substr($this->name, 0,
+            -strlen(self::SERVICE_NAME_SUFFIX)));
+
+        $this->model = new $class($this);
     }
 
     /**
