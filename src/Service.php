@@ -191,19 +191,27 @@ abstract class Service
 
     /**
      * Constructor.
-     * @param froq\App $app
-     * @param string   $name
-     * @param string   $method
-     * @param array    $methodArguments
+     * @param froq\App|null $app
+     * @param string|null   $name
+     * @param string|null   $method
+     * @param array|null    $methodArguments
      */
-    public final function __construct(App $app, string $name = null, string $method = null,
+    public final function __construct(App $app = null, string $name = null, string $method = null,
         array $methodArguments = null)
     {
-        $this->app = $app;
+        // get app from global if null given (for internal calls)
+        $app = $app ?? app();
+        if ($app == null) {
+            throw new ServiceException('Services need an instance of froq\App, no instance given to'.
+                ' constructor and found in global froq scope');
+        }
+        // get name as called class (for internal calls)
+        $name = $name ?? substr(strrchr(static::class, '\\'), 1);
 
-        if ($name != null) $this->setName($name);
-        if ($method != null) $this->setMethod($method);
-        if ($methodArguments != null) $this->setMethodArguments($methodArguments);
+        $this->app = $app;
+        $name && $this->setName($name);
+        $method && $this->setMethod($method);
+        $methodArguments && $this->setMethodArguments($methodArguments);
 
         // these methods work only with self config
         $this->loadConfig();
