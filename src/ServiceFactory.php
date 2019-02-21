@@ -56,21 +56,21 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodArguments = null;
-        $serviceAliases = $app->configValue('service.aliases', []);
+        $serviceAliases = $app->configValue('service')['aliases'] ?? null;
 
         // main
-        if (empty($serviceName)) {
+        if ($serviceName == '') {
             $serviceName = Service::SERVICE_MAIN;
         }
         // aliases
-        elseif (!empty($serviceAliases[$serviceName][0])) {
+        elseif (isset($serviceAliases[$serviceName][0])) {
             $serviceNameAlias = $serviceName;
             $serviceName = $serviceAliases[$serviceName][0]; // 0 => name, methods => ...
         }
         // regexp routes
-        else if (!empty($serviceAliases['~~'])) {
+        else if (isset($serviceAliases['~~'])) {
             $uriPath = $requestUri->getPath();
-            foreach ($serviceAliases['~~'] as $route) {
+            foreach ((array) $serviceAliases['~~'] as $route) {
                 // these are required
                 if (empty($route['method']) || empty($route['pattern'])) {
                     throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
@@ -111,7 +111,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             if ($service->usesMainOnly()) {
                 $serviceMethod = Service::METHOD_MAIN;
             } elseif ($service->isSite()) {
-                if (empty($serviceMethod)) {
+                if ($serviceMethod == '') {
                     // from segment
                     $serviceMethod = strtolower($requestUri->segment(1, ''));
                 }
