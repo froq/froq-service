@@ -530,17 +530,19 @@ abstract class Service
         $request = $this->app->request();
         $response = $this->app->response();
 
-        [$methodMain, $methodInit, $methodOnBefore, $methodOnAfter] = [
-            self::METHOD_MAIN, self::METHOD_INIT,
+        [$serviceMain, $methodMain, $methodInit, $methodOnBefore, $methodOnAfter] = [
+            self::SERVICE_MAIN, self::METHOD_MAIN, self::METHOD_INIT,
             self::METHOD_ON_BEFORE, self::METHOD_ON_AFTER,
         ];
 
-        // redirect "service/main" to "service/" (301 Moved Permanently)
         @ [$serviceName, $serviceMethod] = $request->uri()->segments();
+        if ($serviceName != null && strtolower($serviceName) == strtolower($serviceMain)) {
+            // redirect "main/" to "/" (301 Moved Permanently)
+            return $response->redirect('/', 301)->end();
+        }
         if ($serviceMethod != null && strtolower($serviceMethod) == $methodMain) {
-            $response->redirect('/'. strtolower($serviceName), 301);
-            $response->end();
-            return;
+            // redirect "<service>/main" to "<service>/" (301 Moved Permanently)
+            return $response->redirect('/'. strtolower($serviceName), 301)->end();
         }
 
         // call service init method
