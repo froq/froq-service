@@ -176,6 +176,67 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
     }
 
     /**
+     * To service name.
+     * @param  string $serviceName
+     * @return string
+     */
+    public static final function toServiceName(string $serviceName): string
+    {
+        $serviceName = ucfirst($serviceName);
+        if (strpos($serviceName, '-')) {
+            $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
+                return ucfirst($match[1]);
+            }, $serviceName);
+        }
+
+        return sprintf('%s%s', $serviceName, Service::SERVICE_NAME_SUFFIX);
+    }
+
+    /**
+     * To service name.
+     * @param  string $serviceName
+     * @return string
+     */
+    public static final function toServiceFile(string $serviceName): string
+    {
+        $serviceFile = sprintf('%s/app/service/%s/%s.php', APP_DIR, $serviceName, $serviceName);
+        if (!file_exists($serviceFile) && (
+            $serviceName == (Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX)
+                || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX))) {
+            $serviceFile = sprintf('%s/app/service/default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
+        }
+
+        return $serviceFile;
+    }
+
+    /**
+     * To service class.
+     * @param  string $serviceName
+     * @return string
+     */
+    public static final function toServiceClass(string $serviceName): string
+    {
+        return sprintf('%s\\%s', Service::NAMESPACE, $serviceName);
+    }
+
+    /**
+     * To service method.
+     * @param  string $serviceMethod
+     * @return string
+     */
+    public static final function toServiceMethod(string $serviceMethod): string
+    {
+        $serviceMethod = ucfirst($serviceMethod);
+        if (strpos($serviceMethod, '-')) {
+            $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
+                return ucfirst($match[1]);
+            }, $serviceMethod);
+        }
+
+        return sprintf('%s%s', Service::METHOD_NAME_PREFIX, $serviceMethod);
+    }
+
+    /**
      * Is service exists.
      * @param  string $serviceFile
      * @param  string $serviceClass
@@ -209,66 +270,5 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
     private static final function isServiceFallMethodExists(?Service $service): bool
     {
         return $service && method_exists($service, Service::METHOD_FALL);
-    }
-
-    /**
-     * To service name.
-     * @param  string $serviceName
-     * @return string
-     */
-    private static final function toServiceName(string $serviceName): string
-    {
-        $serviceName = ucfirst($serviceName);
-        if (strpos($serviceName, '-')) {
-            $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
-                return ucfirst($match[1]);
-            }, $serviceName);
-        }
-
-        return sprintf('%s%s', $serviceName, Service::SERVICE_NAME_SUFFIX);
-    }
-
-    /**
-     * To service method.
-     * @param  string $serviceMethod
-     * @return string
-     */
-    private static final function toServiceMethod(string $serviceMethod): string
-    {
-        $serviceMethod = ucfirst($serviceMethod);
-        if (strpos($serviceMethod, '-')) {
-            $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
-                return ucfirst($match[1]);
-            }, $serviceMethod);
-        }
-
-        return sprintf('%s%s', Service::METHOD_NAME_PREFIX, $serviceMethod);
-    }
-
-    /**
-     * To service name.
-     * @param  string $serviceName
-     * @return string
-     */
-    private static final function toServiceFile(string $serviceName): string
-    {
-        $serviceFile = sprintf('%s/app/service/%s/%s.php', APP_DIR, $serviceName, $serviceName);
-        if (!file_exists($serviceFile) && (
-            $serviceName == (Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX)
-                || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX))) {
-            $serviceFile = sprintf('%s/app/service/default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
-        }
-
-        return $serviceFile;
-    }
-
-    /**
-     * To service class.
-     * @param  string $serviceName
-     * @return string
-     */
-    private static final function toServiceClass(string $serviceName): string
-    {
-        return sprintf('%s\\%s', Service::NAMESPACE, $serviceName);
     }
 }
