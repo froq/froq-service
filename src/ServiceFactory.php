@@ -189,7 +189,12 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             }, $serviceName);
         }
 
-        return sprintf('%s%s', $serviceName, Service::SERVICE_NAME_SUFFIX);
+        if ($serviceName == Service::SERVICE_NAME_SUFFIX
+            || substr($serviceName, -7) != Service::SERVICE_NAME_SUFFIX) {
+            $serviceName .= Service::SERVICE_NAME_SUFFIX;
+        }
+
+        return $serviceName;
     }
 
     /**
