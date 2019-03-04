@@ -103,7 +103,7 @@ abstract class Service
      * Method arguments.
      * @var array
      */
-    protected $methodArguments;
+    protected $methodArguments = [];
 
     /**
      * Uri.
@@ -211,7 +211,7 @@ abstract class Service
         $this->app = $app;
         $name && $this->setName($name);
         $method && $this->setMethod($method);
-        $methodArguments && $this->setMethodArguments($methodArguments);
+        $method && $methodArguments && $this->setMethodArguments($method, $methodArguments);
 
         // these methods work only with self config
         $this->loadConfig();
@@ -278,21 +278,23 @@ abstract class Service
 
     /**
      * Set method arguments.
-     * @param  array $methodArguments
+     * @param  string $method
+     * @param  array  $methodArguments
      * @return void
      */
-    public final function setMethodArguments(array $methodArguments): void
+    public final function setMethodArguments(string $method, array $methodArguments): void
     {
-        $this->methodArguments = $methodArguments;
+        $this->methodArguments[$method] = $methodArguments;
     }
 
     /**
      * Get method arguments.
+     * @param  string|null $method
      * @return ?array
      */
-    public final function getMethodArguments(): ?array
+    public final function getMethodArguments(string $method = null): ?array
     {
-        return $this->methodArguments;
+        return $method ? $this->methodArguments[$method] ?? null : $this->methodArguments;
     }
 
     /**
@@ -567,7 +569,7 @@ abstract class Service
             if ($this->useMainOnly || $this->method == $methodMain || $this->method == '') {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
+                $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
             } else {
                 $output = $this->$methodMain(); // calls FailService::main() actually
             }
@@ -575,7 +577,7 @@ abstract class Service
             if ($this->useMainOnly) {
                 $output = $this->$methodMain();
             } elseif (in_array($this->method, ['get', 'post', 'put', 'delete'])) {
-                $output = call_user_func_array([$this, $this->method], (array) $this->methodArguments);
+                $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
             } else {
                 $output = $this->$methodMain(); // calls FailService::main() actually
             }

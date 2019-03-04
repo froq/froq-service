@@ -168,7 +168,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                     }
                 }
 
-                $service->setMethodArguments($serviceMethodArguments);
+                $service->setMethodArguments($serviceMethod, $serviceMethodArguments);
             }
         }
 
