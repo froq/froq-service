@@ -56,7 +56,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodArguments = null;
-        $serviceAliases = $app->configValue('service')['aliases'] ?? null;
+        $serviceAliases = $app->configValue('service.aliases');
 
         // main
         if ($serviceName == '') {
@@ -65,7 +65,10 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         // aliases
         elseif (isset($serviceAliases[$serviceName][0])) {
             $serviceNameAlias = $serviceName;
-            $serviceName = $serviceAliases[$serviceName][0]; // 0 => name, methods => ...
+            // 0 => name, methods => ...
+            $serviceName = $serviceAliases[$serviceNameAlias][0];
+            // 0 => name, method => ... if given for one invoke direction
+            $serviceMethod = $serviceAliases[$serviceNameAlias]['method'] ?? null;
         }
         // regexp routes
         else if (isset($serviceAliases['~~'])) {
@@ -75,6 +78,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                 if (empty($route['method']) || empty($route['pattern'])) {
                     throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
                 }
+
                 if (preg_match($route['pattern'], $uriPath, $match)) {
                     $serviceName = $route[0];
                     $serviceMethod = $route['method'];
@@ -106,19 +110,25 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
         $service = new $serviceClass($app, $serviceName, $serviceMethod);
 
+        // detect and set service method
         if (!$service->isFailService()) {
-            // detect service method
-            if ($service->usesMainOnly()) {
+            if ($serviceMethod != '') { // pass
+                // @note: method could be checked in main() [if $useMainOnly=true in service]
+                // @note: this will override $useMainOnly option in service
+            } elseif ($service->usesMainOnly()) {
+                // main only
                 $serviceMethod = Service::METHOD_MAIN;
             } elseif ($service->isSite()) {
+                // from segment
                 if ($serviceMethod == '') {
-                    // from segment
                     $serviceMethod = strtolower($requestUri->segment(1, ''));
                 }
 
-                if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) { // alias
+                // alias
+                if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) {
                     $serviceMethod = self::toServiceMethod($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
                 } elseif ($serviceMethod == '' || $serviceMethod == Service::METHOD_MAIN) {
+                    // main
                     $serviceMethod = Service::METHOD_MAIN;
                 } else {
                     $serviceMethod = self::toServiceMethod($serviceMethod);

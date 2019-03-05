@@ -564,9 +564,9 @@ abstract class Service
 
         $output = null;
 
-        // check site or rest interface, call the target method
+        // check site/rest, call the target method
         if ($this->isSite()) {
-            if ($this->useMainOnly || $this->method == $methodMain || $this->method == '') {
+            if ($this->method == '' || $this->method == $methodMain) {
                 $output = $this->$methodMain();
             } elseif (method_exists($this, $this->method)) {
                 $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
@@ -574,7 +574,7 @@ abstract class Service
                 $output = $this->$methodMain(); // calls FailService::main() actually
             }
         } elseif ($this->isRest()) {
-            if ($this->useMainOnly) {
+            if ($this->method == '' || $this->method == $methodMain) {
                 $output = $this->$methodMain();
             } elseif (in_array($this->method, ['get', 'post', 'put', 'delete'])) {
                 $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
