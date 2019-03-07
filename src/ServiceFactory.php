@@ -55,6 +55,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         $serviceName = strtolower($requestUri->segment(0, ''));
         $serviceNameAlias = '';
         $serviceMethod = null;
+        $serviceMethodFilter = null;
         $serviceMethodArguments = null;
         $serviceAliases = $app->configValue('service.aliases');
 
@@ -69,6 +70,8 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             $serviceName = $serviceAliases[$serviceNameAlias][0];
             // 0 => name, method => ... if given for one invoke direction
             $serviceMethod = $serviceAliases[$serviceNameAlias]['method'] ?? null;
+            // 0 => name, method => ..., methodFilter => ... if given for one invoke direction filter
+            $serviceMethodFilter = $serviceAliases[$serviceNameAlias]['methodFilter'] ?? null;
         }
         // regexp routes
         else if (isset($serviceAliases['~~'])) {
@@ -82,6 +85,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                 if (preg_match($route['pattern'], $uriPath, $match)) {
                     $serviceName = $route[0];
                     $serviceMethod = $route['method'];
+                    $serviceMethodFilter = $route['methodFilter'] ?? null;
                     $serviceMethodArguments = array_slice($match, 1);
                     break;
                 }
@@ -165,7 +169,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
             $service->setMethod($serviceMethod);
 
-            // set service method args
+            // set service method arguments
             if (self::isServiceMethodExists($service, $serviceMethod)) {
                 $serviceMethodArguments = isset($serviceMethodArguments) ? $serviceMethodArguments
                     : $requestUri->segmentArguments($service->isSite() ? 2 : 1);
@@ -179,6 +183,11 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                 }
 
                 $service->setMethodArguments($serviceMethod, $serviceMethodArguments);
+
+                // method filter
+                if ($serviceMethodFilter != null) {
+                    $serviceMethodFilter->call($service);
+                }
             }
         }
 
