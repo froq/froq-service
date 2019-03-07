@@ -241,11 +241,13 @@ abstract class Service
     /**
      * Set name.
      * @param  string $name
-     * @return void
+     * @return self
      */
-    public final function setName(string $name): void
+    public final function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
@@ -260,11 +262,13 @@ abstract class Service
     /**
      * Set method.
      * @param  string $method
-     * @return void
+     * @return self
      */
-    public final function setMethod(string $method): void
+    public final function setMethod(string $method): self
     {
         $this->method = $method;
+
+        return $this;
     }
 
     /**
@@ -280,11 +284,13 @@ abstract class Service
      * Set method arguments.
      * @param  string $method
      * @param  array  $methodArguments
-     * @return void
+     * @return self
      */
-    public final function setMethodArguments(string $method, array $methodArguments): void
+    public final function setMethodArguments(string $method, array $methodArguments): self
     {
         $this->methodArguments[$method] = $methodArguments;
+
+        return $this;
     }
 
     /**
@@ -338,11 +344,13 @@ abstract class Service
     /**
      * Set allowed request methods.
      * @param  array $allowedRequestMethods
-     * @return void
+     * @return self
      */
-    public final function setAllowedRequestMethods(array $allowedRequestMethods): void
+    public final function setAllowedRequestMethods(array $allowedRequestMethods): self
     {
         $this->allowedRequestMethods = array_map('strtoupper', $allowedRequestMethods);
+
+        return $this;
     }
 
     /**
@@ -362,6 +370,33 @@ abstract class Service
     public final function isAllowedRequestMethod(string $method): bool
     {
         return empty($this->allowedRequestMethods) || in_array($method, $this->allowedRequestMethods);
+    }
+
+    /**
+     * Get short name.
+     * @return ?string
+     */
+    public final function getShortName(): ?string
+    {
+        return ($this->name != null) ? substr($this->name, 0, -strlen(self::SERVICE_NAME_SUFFIX)) : null;
+    }
+
+    /**
+     * Get alias.
+     * @return ?string
+     */
+    public final function getAlias(): ?string
+    {
+        $name = $this->getShortName(true);
+        $aliases = $this->app->configValue('service.aliases', []);
+
+        foreach ($aliases as $alias => $aliasOptions) {
+            if ($name == $aliasOptions[0]) {
+                return $alias;
+            }
+        }
+
+        return null;
     }
 
     /**
