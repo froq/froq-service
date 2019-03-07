@@ -382,24 +382,6 @@ abstract class Service
     }
 
     /**
-     * Get alias.
-     * @return ?string
-     */
-    public final function getAlias(): ?string
-    {
-        $name = $this->getShortName(true);
-        $aliases = $this->app->configValue('service.aliases', []);
-
-        foreach ($aliases as $alias => $aliasOptions) {
-            if ($name == $aliasOptions[0]) {
-                return $alias;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Get type.
      * @return string
      */
