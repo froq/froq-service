@@ -645,7 +645,7 @@ abstract class Service
             $this->view->setFileFoot();
         }
 
-        $this->view->displayAll($data);
+        $this->view->display($data);
     }
 
     /**
