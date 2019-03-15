@@ -554,12 +554,12 @@ abstract class Service
             self::METHOD_ON_BEFORE, self::METHOD_ON_AFTER,
         ];
 
-        $serviceName = $request->uri()->segment(0);
+        $serviceName = $request->uri()->segment(1);
         if ($serviceName != null && strtolower($serviceName) == strtolower($serviceMain)) {
             // redirect "main/" to "/" (301 Moved Permanently)
             return $response->redirect('/', 301)->end();
         }
-        $serviceMethod = $request->uri()->segment(1);
+        $serviceMethod = $request->uri()->segment(2);
         if ($serviceMethod != null && strtolower($serviceMethod) == $methodMain) {
             // redirect "<service>/main" to "<service>/" (301 Moved Permanently)
             return $response->redirect('/'. strtolower($serviceName), 301)->end();

@@ -52,7 +52,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
         // detect service name if provided
         $service = null;
-        $serviceName = strtolower($requestUri->segment(0, ''));
+        $serviceName = strtolower($requestUri->segment(1, ''));
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodFilter = null;
@@ -125,7 +125,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             } elseif ($service->isSite()) {
                 // from segment
                 if ($serviceMethod == '') {
-                    $serviceMethod = strtolower($requestUri->segment(1, ''));
+                    $serviceMethod = strtolower($requestUri->segment(2, ''));
                 }
 
                 // alias
