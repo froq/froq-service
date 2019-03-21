@@ -106,18 +106,6 @@ abstract class Service
     protected $methodArguments = [];
 
     /**
-     * Uri.
-     * @var string
-     */
-    protected $uri;
-
-    /**
-     * Uri full.
-     * @var string
-     */
-    protected $uriFull;
-
-    /**
      * Config.
      * @var froq\config\Config
      */
@@ -185,9 +173,9 @@ abstract class Service
 
     /**
      * Allowed request methods.
-     * @var array
+     * @var ?array
      */
-    protected $allowedRequestMethods = [];
+    protected $allowedRequestMethods = null;
 
     /**
      * Constructor.
@@ -304,44 +292,6 @@ abstract class Service
     }
 
     /**
-     * Get uri.
-     * @return string
-     */
-    public final function getUri(): string
-    {
-        if ($this->uri == null) {
-            // get real uri even if alias used
-            $name = implode('-', array_slice(explode('-', to_dash_from_upper($this->name)), 0, -1));
-            $this->uri = '/'. $name;
-
-            if ($this->isSite()) {
-                $method = implode('-', array_slice(explode('-', to_dash_from_upper($this->method)), 1));
-                $this->uri .= '/'. $method;
-            }
-        }
-
-        return rtrim($this->uri, '/');
-    }
-
-    /**
-     * Get uri full.
-     * @return string
-     */
-    public final function getUriFull(): string
-    {
-        if ($this->uriFull == null) {
-            $this->uriFull = $this->getUri();
-
-            $arguments = $this->app->request()->uri()->segmentArguments($this->isSite() ? 2 : 1);
-            if (!empty($arguments)) {
-                $this->uriFull = sprintf('%s/%s', $this->uriFull, implode('/', $arguments));
-            }
-        }
-
-        return rtrim($this->uriFull, '/');
-    }
-
-    /**
      * Set allowed request methods.
      * @param  array $allowedRequestMethods
      * @return self
@@ -355,9 +305,9 @@ abstract class Service
 
     /**
      * Get allowed request methods.
-     * @return array
+     * @return ?array
      */
-    public final function getAllowedRequestMethods(): array
+    public final function getAllowedRequestMethods(): ?array
     {
         return $this->allowedRequestMethods;
     }
@@ -369,7 +319,7 @@ abstract class Service
      */
     public final function isAllowedRequestMethod(string $method): bool
     {
-        return empty($this->allowedRequestMethods) || in_array($method, $this->allowedRequestMethods);
+        return $this->allowedRequestMethods == null || in_array($method, (array) $this->allowedRequestMethods);
     }
 
     /**
@@ -628,7 +578,7 @@ abstract class Service
         $meta = (array) ($content['meta'] ?? []);
 
         // set meta if provided
-        if (!empty($meta)) {
+        if ($meta != null) {
             foreach ($meta as $name => $value) {
                 $this->view->setMeta($name, $value);
             }
@@ -696,7 +646,7 @@ abstract class Service
         $this->acl = new Acl($this);
 
         $rules = $this->config->get('acl.rules');
-        if (!empty($rules)) {
+        if ($rules != null) {
             $this->acl->setRules($rules);
         }
     }
@@ -710,7 +660,7 @@ abstract class Service
         $this->validation = new Validation();
 
         $rules = $this->config->get('validation.rules');
-        if (!empty($rules)) {
+        if ($rules != null) {
             $this->validation->setRules($rules);
         }
     }
