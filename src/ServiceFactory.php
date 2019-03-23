@@ -201,6 +201,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      */
     public static final function toServiceName(string $serviceName): string
     {
+        // foo-bar => FooBar
         $serviceName = ucfirst($serviceName);
         if (strpos($serviceName, '-')) {
             $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
@@ -208,8 +209,8 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             }, $serviceName);
         }
 
-        if ($serviceName == Service::SERVICE_NAME_SUFFIX
-            || substr($serviceName, -7) != Service::SERVICE_NAME_SUFFIX) {
+        // foo-bar => FooBarService
+        if ($serviceName == Service::SERVICE_NAME_SUFFIX || substr($serviceName, -7) != Service::SERVICE_NAME_SUFFIX) {
             $serviceName .= Service::SERVICE_NAME_SUFFIX;
         }
 
@@ -250,6 +251,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      */
     public static final function toServiceMethod(string $serviceMethod): string
     {
+        // foo-bar => FooBar
         $serviceMethod = ucfirst($serviceMethod);
         if (strpos($serviceMethod, '-')) {
             $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
@@ -257,6 +259,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             }, $serviceMethod);
         }
 
+        // foo-bar => doFooBar
         return sprintf('%s%s', Service::METHOD_NAME_PREFIX, $serviceMethod);
     }
 

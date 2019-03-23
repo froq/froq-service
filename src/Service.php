@@ -535,20 +535,22 @@ abstract class Service
 
         // check site/rest, call the target method
         if ($this->isSite()) {
+            $methodArguments = (array) $this->getMethodArguments($this->method);
             if ($this->method == '' || $this->method == $methodMain) {
-                $output = $this->$methodMain();
+                $output = $this->$methodMain($methodArguments);
             } elseif (method_exists($this, $this->method)) {
-                $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
+                $output = call_user_func_array([$this, $this->method], $methodArguments);
             } else {
-                $output = $this->$methodMain(); // calls FailService::main() actually
+                $output = $this->$methodMain($methodArguments); // calls FailService::main() actually
             }
         } elseif ($this->isRest()) {
+            $methodArguments = (array) $this->getMethodArguments($this->method);
             if ($this->method == '' || $this->method == $methodMain) {
-                $output = $this->$methodMain();
+                $output = $this->$methodMain($methodArguments);
             } elseif (in_array($this->method, ['get', 'post', 'put', 'delete'])) {
-                $output = call_user_func_array([$this, $this->method], (array) $this->getMethodArguments($this->method));
+                $output = call_user_func_array([$this, $this->method], $methodArguments);
             } else {
-                $output = $this->$methodMain(); // calls FailService::main() actually
+                $output = $this->$methodMain($methodArguments); // calls FailService::main() actually
             }
         }
 
