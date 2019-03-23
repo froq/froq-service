@@ -190,8 +190,8 @@ abstract class Service
         // get app from global if null given (for internal calls)
         $app = $app ?? app();
         if ($app == null) {
-            throw new ServiceException('Services need an instance of froq\App, no instance given to'.
-                ' constructor and found in global froq scope');
+            throw new ServiceException('Services need an instance of froq\App, no instance given to '.
+                'constructor and found in global froq scope');
         }
         // get name as called class (for internal calls)
         $name = $name ?? substr(strrchr(static::class, '\\'), 1);
@@ -214,6 +214,12 @@ abstract class Service
         }
         if ($this->useSession) {
             $this->session = Session::init($this->app->configValue('session'));
+        }
+
+        // call service init method
+        $methodInit = self::METHOD_INIT;
+        if (method_exists($this, $methodInit)) {
+            $this->$methodInit();
         }
     }
 
@@ -490,19 +496,19 @@ abstract class Service
      * @return any That returned from service's target (called) method.
      * @throws froq\service\ServiceException
      */
-    public final function run()
+    public final function run(bool $checkRun = true)
     {
         // run once
-        $this->___checkRun(new ServiceException("You cannot call Service::run() anymore, it's ".
-            "already called in App::run() once"));
+        if ($checkRun) {
+            $this->___checkRun(new ServiceException("You cannot call {$this->name}::run() anymore, it's ".
+                "already called in App::run() once"));
+        }
 
         $request = $this->app->request();
         $response = $this->app->response();
 
-        [$serviceMain, $methodMain, $methodInit, $methodOnBefore, $methodOnAfter] = [
-            self::SERVICE_MAIN, self::METHOD_MAIN, self::METHOD_INIT,
-            self::METHOD_ON_BEFORE, self::METHOD_ON_AFTER,
-        ];
+        [$serviceMain, $methodMain, $methodOnBefore, $methodOnAfter] = [
+            self::SERVICE_MAIN, self::METHOD_MAIN, self::METHOD_ON_BEFORE, self::METHOD_ON_AFTER];
 
         $serviceName = $request->uri()->segment(1);
         if ($serviceName != null && strtolower($serviceName) == strtolower($serviceMain)) {
@@ -513,11 +519,6 @@ abstract class Service
         if ($serviceMethod != null && strtolower($serviceMethod) == $methodMain) {
             // redirect "<service>/main" to "<service>/" (301 Moved Permanently)
             return $response->redirect('/'. strtolower($serviceName), 301)->end();
-        }
-
-        // call service init method
-        if (method_exists($this, $methodInit)) {
-            $this->$methodInit();
         }
 
         // request method is allowed?
