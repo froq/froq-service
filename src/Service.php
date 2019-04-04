@@ -112,6 +112,24 @@ abstract class Service
     protected $config;
 
     /**
+     * Acl.
+     * @var froq\acl\Acl
+     */
+    protected $acl;
+
+    /**
+     * Validation.
+     * @var froq\validation\Validation
+     */
+    protected $validation;
+
+    /**
+     * Model.
+     * @var froq\database\model\Model
+     */
+    protected $model;
+
+    /**
      * View.
      * @var froq\view\View
      */
@@ -122,24 +140,6 @@ abstract class Service
      * @var froq\session\Session
      */
     protected $session;
-
-    /**
-     * Model.
-     * @var froq\database\model\Model
-     */
-    protected $model;
-
-    /**
-     * Validation.
-     * @var froq\validation\Validation
-     */
-    protected $validation;
-
-    /**
-     * Acl.
-     * @var froq\acl\Acl
-     */
-    protected $acl;
 
     /**
      * Use model.
@@ -173,19 +173,26 @@ abstract class Service
 
     /**
      * Allowed request methods.
-     * @var ?array
+     * @var array|null
      */
-    protected $allowedRequestMethods = null;
+    protected $allowedRequestMethods;
+
+    /**
+     * Caller service (@see App::callServiceMethod()).
+     * @var froq\service\Service|null
+     */
+    protected $callerService;
 
     /**
      * Constructor.
-     * @param froq\App|null $app
-     * @param string|null   $name
-     * @param string|null   $method
-     * @param array|null    $methodArguments
+     * @param froq\App|null             $app
+     * @param string|null               $name
+     * @param string|null               $method
+     * @param array|null                $methodArguments
+     * @param froq\service\Service|null $callerService
      */
     public final function __construct(App $app = null, string $name = null, string $method = null,
-        array $methodArguments = null)
+        array $methodArguments = null, Service $callerService = null)
     {
         // get app from global if null given (for internal calls)
         $app = $app ?? app();
@@ -200,6 +207,7 @@ abstract class Service
         $name && $this->setName($name);
         $method && $this->setMethod($method);
         $method && $methodArguments && $this->setMethodArguments($method, $methodArguments);
+        $callerService && $this->setCallerService($callerService);
 
         // these methods work only with self config
         $this->loadConfig();
@@ -215,6 +223,9 @@ abstract class Service
         if ($this->useSession) {
             $this->session = Session::init($this->app->configValue('session'));
         }
+
+        // @important
+        $this->app->setService($this);
 
         // call service init method
         $methodInit = self::METHOD_INIT;
@@ -399,6 +410,25 @@ abstract class Service
     public final function getValidation(): Validation
     {
         return $this->validation;
+    }
+
+    /**
+     * Set caller service.
+     * @param  ?froq\service\Service $callerService
+     * @return void
+     */
+    public function setCallerService(?Service $callerService): void
+    {
+        $this->callerService = $callerService;
+    }
+
+    /**
+     * Get caller service.
+     * @return ?froq\service\Service
+     */
+    public function getCallerService(): ?Service
+    {
+        return $this->callerService;
     }
 
     /**
