@@ -228,7 +228,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         if (!file_exists($serviceFile) && (
             $serviceName == (Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX)
                 || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX))) {
-            $serviceFile = sprintf('%s/app/service/default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
+            $serviceFile = sprintf('%s/app/service/_default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
         }
 
         return $serviceFile;
