@@ -52,7 +52,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
         // detect service name if provided
         $service = null;
-        $serviceName = strtolower($requestUri->segment(1, ''));
+        $serviceName = $serviceNameOrig = strtolower($requestUri->segment(1, ''));
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodFilter = null;
@@ -62,33 +62,46 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         // main
         if ($serviceName == '') {
             $serviceName = Service::SERVICE_MAIN;
-        }
-        // aliases
-        elseif (isset($serviceAliases[$serviceName][0])) {
-            $serviceNameAlias = $serviceName;
-            // 0 => name, methods => ...
-            $serviceName = $serviceAliases[$serviceNameAlias][0];
-            // 0 => name, method => ... if given for one invoke direction
-            $serviceMethod = $serviceAliases[$serviceNameAlias]['method'] ?? null;
-            // 0 => name, method => ..., methodFilter => ... if given for one invoke direction filter
-            $serviceMethodFilter = $serviceAliases[$serviceNameAlias]['methodFilter'] ?? null;
-        }
-        // regexp routes
-        else if (isset($serviceAliases['~~'])) {
-            $uriPath = $requestUri->getPath();
-            foreach ((array) $serviceAliases['~~'] as $route) {
-                // these are required
-                if (empty($route['method']) || empty($route['pattern'])) {
-                    throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
-                }
+        } else {
+            $serviceName = self::toServiceName($serviceName);
+            $serviceFile = self::toServiceFile($serviceName);
+            $serviceClass = self::toServiceClass($serviceName);
 
-                if (preg_match($route['pattern'], $uriPath, $match)) {
-                    $serviceName = $route[0];
-                    $serviceMethod = $route['method'];
-                    $serviceMethodFilter = $route['methodFilter'] ?? null;
-                    $serviceMethodArguments = array_slice($match, 1);
-                    break;
+            if (!self::isServiceExists($serviceFile, $serviceClass)) {
+                // check aliases
+                if (isset($serviceAliases[$serviceNameOrig][0])) {
+                    $serviceNameAlias = $serviceNameOrig;
+                    // 0 => name, methods => ...
+                    $serviceName = $serviceAliases[$serviceNameAlias][0];
+                    // 0 => name, method => ... if given for one invoke direction
+                    $serviceMethod = $serviceAliases[$serviceNameAlias]['method'] ?? null;
+                    // 0 => name, method => ..., methodFilter => ... if given for one invoke direction filter
+                    $serviceMethodFilter = $serviceAliases[$serviceNameAlias]['methodFilter'] ?? null;
                 }
+                // check regexp routes
+                else if (isset($serviceAliases['~~'])) {
+                    $uriPath = $requestUri->getPath();
+                    foreach ((array) $serviceAliases['~~'] as $route) {
+                        // these are required
+                        if (empty($route['method']) || empty($route['pattern'])) {
+                            throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
+                        }
+
+                        if (preg_match($route['pattern'], $uriPath, $match)) {
+                            $serviceName = $route[0];
+                            $serviceMethod = $route['method'];
+                            $serviceMethodFilter = $route['methodFilter'] ?? null;
+                            $serviceMethodArguments = array_slice($match, 1);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // if real names disabled
+            $allowRealName = $app->configValue('service.allowRealName');
+            if (!$allowRealName && self::isServiceExists($serviceFile, $serviceClass)) {
+                $serviceName = '';
             }
         }
 
