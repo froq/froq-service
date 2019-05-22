@@ -100,7 +100,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
             // if real names disabled
             $allowRealName = $app->configValue('service.allowRealName');
-            if (!$allowRealName && self::isServiceExists($serviceFile, $serviceClass)) {
+            if (!$allowRealName && $serviceNameAlias != '' && self::isServiceExists($serviceFile, $serviceClass)) {
                 $serviceName = '';
             }
         }
