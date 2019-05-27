@@ -596,11 +596,13 @@ abstract class Service
      * View.
      * @param  string $file
      * @param  array  $content
+     * @param  int    $code
      * @param  bool   $useViewPartials
      * @return void
      * @throws froq\service\ServiceException
      */
-    public final function view(string $file, array $content = null, bool $useViewPartials = null): void
+    public final function view(string $file, array $content = null, int $code = null,
+        bool $useViewPartials = null): void
     {
         if (!$this->useView) {
             throw new ServiceException("Set \$useView = true in service and be sure that already ".
@@ -626,6 +628,11 @@ abstract class Service
         if ($useViewPartials) {
             $this->view->setFileHead();
             $this->view->setFileFoot();
+        }
+
+        // shortcut for response code
+        if ($code) {
+            $this->app->response()->status($code);
         }
 
         $this->view->display($data);
