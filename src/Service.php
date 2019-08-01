@@ -594,23 +594,23 @@ abstract class Service
 
     /**
      * View.
-     * @param  string $file
-     * @param  array  $content
-     * @param  int    $code
-     * @param  bool   $useViewPartials
+     * @param  string          $file
+     * @param  array           $content
+     * @param  int             $code
+     * @param  bool|array|null $partials
      * @return void
      * @throws froq\service\ServiceException
      */
     public final function view(string $file, array $content = null, int $code = null,
-        bool $useViewPartials = null): void
+        $partials = null): void
     {
         if (!$this->useView) {
             throw new ServiceException("Set \$useView = true in service and be sure that already ".
                 "included 'froq/froq-view' module via Composer");
         }
 
-        $data = (array) ($content['data'] ?? []);
         $meta = (array) ($content['meta'] ?? []);
+        $data = (array) ($content['data'] ?? []);
 
         // set meta if provided
         if ($meta != null) {
@@ -622,12 +622,17 @@ abstract class Service
         $this->view->setFile($file);
 
         // override on runtime calls
-        $useViewPartials = $useViewPartials ?? $this->useViewPartials;
+        $partials = $partials ?? $this->useViewPartials;
 
         // set header/footer partials if uses
-        if ($useViewPartials) {
-            $this->view->setFileHead();
-            $this->view->setFileFoot();
+        if ($partials) {
+            if ($partials === true) {
+                $this->view->setFileHead();
+                $this->view->setFileFoot();
+            } elseif (is_array($partials)) {
+                $this->view->setFileHead($partials['head'] ?? null);
+                $this->view->setFileFoot($partials['foot'] ?? null);
+            }
         }
 
         // shortcut for response code
