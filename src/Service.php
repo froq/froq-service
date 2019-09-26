@@ -30,7 +30,6 @@ use froq\App;
 use froq\acl\Acl;
 use froq\view\View;
 use froq\config\Config;
-use froq\session\Session;
 use froq\validation\Validation;
 use froq\util\traits\OneRunTrait;
 
@@ -136,28 +135,10 @@ abstract class Service
     protected $view;
 
     /**
-     * Session.
-     * @var froq\session\Session
-     */
-    protected $session;
-
-    /**
      * Use model.
      * @var bool
      */
     protected $useModel = false;
-
-    /**
-     * Use view.
-     * @var bool
-     */
-    protected $useView = false;
-
-    /**
-     * Use view partials.
-     * @var bool
-     */
-    protected $useViewPartials = false;
 
     /**
      * Use session.
@@ -170,6 +151,18 @@ abstract class Service
      * @var bool
      */
     protected $useMainOnly = false;
+
+    /**
+     * Use view.
+     * @var bool
+     */
+    protected $useView = false;
+
+    /**
+     * Use view partials.
+     * @var bool
+     */
+    protected $useViewPartials = false;
 
     /**
      * Allowed request methods.
@@ -217,15 +210,19 @@ abstract class Service
             $this->loadModel();
         }
 
+        if ($this->useSession) {
+            $session = $this->app->session();
+            if ($session == null) {
+                throw new ServiceException('App has no session (check session options in config)');
+            }
+            $session->start();
+        }
+
         if ($this->useView) {
             $this->view = new View($this);
         }
-        if ($this->useSession) {
-            $this->session = Session::init($this->app->config('session'));
-        }
 
-        // @important
-        $this->app->setService($this);
+        $this->app->setService($this); // @important
 
         // call service init method
         $methodInit = self::METHOD_INIT;
@@ -376,15 +373,6 @@ abstract class Service
     }
 
     /**
-     * Get session.
-     * @return ?froq\session\Session
-     */
-    public final function getSession(): ?Session
-    {
-        return $this->session;
-    }
-
-    /**
      * Get model.
      * @note   Model Not included in composer.json, so return type is not set here.
      * @return froq\database\model\Model
@@ -437,7 +425,7 @@ abstract class Service
      */
     public final function isSite(): bool
     {
-        return $this->type == self::TYPE_SITE;
+        return ($this->type === self::TYPE_SITE);
     }
 
     /**
@@ -446,7 +434,7 @@ abstract class Service
      */
     public final function isRest(): bool
     {
-        return $this->type == self::TYPE_REST;
+        return ($this->type === self::TYPE_REST);
     }
 
     /**
@@ -455,7 +443,7 @@ abstract class Service
      */
     public final function isMainService(): bool
     {
-        return $this->name == (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX);
+        return ($this->name === (self::SERVICE_MAIN . self::SERVICE_NAME_SUFFIX));
     }
 
     /**
@@ -464,7 +452,7 @@ abstract class Service
      */
     public final function isFailService(): bool
     {
-        return $this->name == (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX);
+        return ($this->name === (self::SERVICE_FAIL . self::SERVICE_NAME_SUFFIX));
     }
 
     /**
@@ -473,7 +461,7 @@ abstract class Service
      */
     public final function isDefaultService(): bool
     {
-        return $this->isMainService() || $this->isFailService();
+        return ($this->isMainService() || $this->isFailService());
     }
 
     /**
@@ -482,25 +470,7 @@ abstract class Service
      */
     public final function usesModel(): bool
     {
-        return $this->useModel == true;
-    }
-
-    /**
-     * Uses view.
-     * @return bool
-     */
-    public final function usesView(): bool
-    {
-        return $this->useView == true;
-    }
-
-    /**
-     * Uses view partials.
-     * @return bool
-     */
-    public final function usesViewPartials(): bool
-    {
-        return $this->useViewPartials == true;
+        return !!$this->useModel;
     }
 
     /**
@@ -509,7 +479,7 @@ abstract class Service
      */
     public final function usesSession(): bool
     {
-        return $this->useSession == true;
+        return !!$this->useSession;
     }
 
     /**
@@ -518,7 +488,25 @@ abstract class Service
      */
     public final function usesMainOnly(): bool
     {
-        return $this->useMainOnly == true;
+        return !!$this->useMainOnly;
+    }
+
+    /**
+     * Uses view.
+     * @return bool
+     */
+    public final function usesView(): bool
+    {
+        return !!$this->useView;
+    }
+
+    /**
+     * Uses view partials.
+     * @return bool
+     */
+    public final function usesViewPartials(): bool
+    {
+        return !!$this->useViewPartials;
     }
 
     /**
