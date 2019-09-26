@@ -221,7 +221,7 @@ abstract class Service
             $this->view = new View($this);
         }
         if ($this->useSession) {
-            $this->session = Session::init($this->app->configValue('session'));
+            $this->session = Session::init($this->app->config('session'));
         }
 
         // @important

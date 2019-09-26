@@ -57,7 +57,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         $serviceMethod = null;
         $serviceMethodFilter = null;
         $serviceMethodArguments = null;
-        $serviceAliases = $app->configValue('service.aliases');
+        $serviceAliases = $app->config('service.aliases');
 
         // main
         if ($serviceName == '') {
@@ -99,7 +99,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
             }
 
             // if real names disabled
-            $allowRealName = $app->configValue('service.allowRealName');
+            $allowRealName = $app->config('service.allowRealName');
             if (!$allowRealName && $serviceNameAlias != '' && self::isServiceExists($serviceFile, $serviceClass)) {
                 $serviceName = '';
             }
