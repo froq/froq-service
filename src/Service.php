@@ -676,7 +676,7 @@ abstract class Service
      */
     private final function loadAcl(): void
     {
-        $this->acl = new Acl($this);
+        $this->acl = new Acl($this->app);
 
         $rules = $this->config->get('acl.rules');
         if ($rules != null) {
