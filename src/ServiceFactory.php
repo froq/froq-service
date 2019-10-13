@@ -80,7 +80,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                 }
                 // check regexp routes
                 else if (isset($serviceAliases['~~'])) {
-                    $uriPath = $requestUri->getPath();
+                    $uriPath = $requestUri->get('path');
                     foreach ((array) $serviceAliases['~~'] as $route) {
                         // these are required
                         if (empty($route['method']) || empty($route['pattern'])) {
