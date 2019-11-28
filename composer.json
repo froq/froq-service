@@ -1,20 +1,16 @@
 {
     "name": "froq/froq-service",
     "homepage": "https://github.com/froq/froq-service",
-    "description": "Service module for Froq!",
+    "description": "Froq! Service.",
     "keywords": ["froq", "service"],
     "license": "MIT",
     "authors": [
         {"name": "Kerem Güneş", "email": "k-gun@mail.com"}
     ],
     "require": {
-        "php": "^7.2",
-        "froq/froq": "^3.0",
-        "froq/froq-util": "^3.0",
-        "froq/froq-acl": "^3.0",
-        "froq/froq-view": "^3.0",
-        "froq/froq-config": "^3.0",
-        "froq/froq-validation": "^3.0"
+        "php": "^7.4",
+        "froq/froq": "^4.0",
+        "froq/froq-app": "^4.0"
     },
     "autoload": {
         "classmap": ["src/"]
