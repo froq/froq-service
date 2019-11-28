@@ -24,27 +24,29 @@
  */
 declare(strict_types=1);
 
-namespace froq\service\service;
+namespace froq\service;
 
-use froq\service\Service;
+use froq\service\{AbstractService, ServiceInterface};
 
 /**
- * Site.
- * @package froq\service\service
- * @object  froq\service\service\Site
+ * Rest Service.
+ * @package froq\service
+ * @object  froq\service\RestService
  * @author  Kerem Güneş <k-gun@mail.com>
- * @since   1.0
+ * @since   1.0, 4.0
  */
-abstract class Site extends Service
+abstract class RestService extends AbstractService implements ServiceInterface
 {
-    /**
-     * Type.
-     * @var string
-     */
-    protected $type = Service::TYPE_SITE;
-
     /**
      * Main.
      */
     public abstract function main();
+
+    /**
+     * Default REST methods.
+     */
+    public abstract function get();
+    public abstract function post();
+    public abstract function put();
+    public abstract function delete();
 }

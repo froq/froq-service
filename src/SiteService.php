@@ -26,14 +26,19 @@ declare(strict_types=1);
 
 namespace froq\service;
 
-use froq\Exception;
+use froq\service\{AbstractService, ServiceInterface};
 
 /**
- * Service Exception.
+ * Site Service.
  * @package froq\service
- * @object  froq\service\ServiceException
+ * @object  froq\service\SiteService
  * @author  Kerem Güneş <k-gun@mail.com>
- * @since   1.0
+ * @since   1.0, 4.0
  */
-final class ServiceException extends Exception
-{}
+abstract class SiteService extends AbstractService implements ServiceInterface
+{
+    /**
+     * Main.
+     */
+    public abstract function main();
+}

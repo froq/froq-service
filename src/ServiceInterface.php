@@ -24,35 +24,39 @@
  */
 declare(strict_types=1);
 
-namespace froq\service\service;
-
-use froq\service\Service;
+namespace froq\service;
 
 /**
- * Rest.
- * @package froq\service\service
- * @object  froq\service\service\Rest
+ * Service Interface.
+ * @package froq\service
+ * @object  froq\service\ServiceInterface
  * @author  Kerem Güneş <k-gun@mail.com>
- * @since   1.0
+ * @since   1.0, 4.0
  */
-abstract class Rest extends Service
+interface ServiceInterface
 {
     /**
-     * Type.
-     * @var string
+     * Namespace.
+     * @const string
      */
-    protected $type = Service::TYPE_REST;
+    public const NAMESPACE             = 'froq\app\service';
 
     /**
-     * Main.
+     * Service suffix and names.
+     * @const string
      */
-    public abstract function main();
+    public const SERVICE_NAME_SUFFIX   = 'Service',
+                 SERVICE_MAIN          = 'Main',
+                 SERVICE_FAIL          = 'Fail';
 
     /**
-     * Default REST methods.
+     * Service method prefix and names.
+     * @const string
      */
-    public abstract function get();
-    public abstract function post();
-    public abstract function put();
-    public abstract function delete();
+    public const METHOD_NAME_PREFIX    = 'do',
+                 METHOD_INIT           = 'init',
+                 METHOD_MAIN           = 'main',
+                 METHOD_FAIL           = 'fail',
+                 METHOD_ON_BEFORE      = 'onBefore',
+                 METHOD_ON_AFTER       = 'onAfter';
 }

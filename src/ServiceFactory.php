@@ -26,65 +26,65 @@ declare(strict_types=1);
 
 namespace froq\service;
 
-use froq\App;
+use froq\app\App;
+use froq\service\{ServiceInterface, ServiceException};
+use ReflectionMethod;
 
 /**
- * Service factory.
+ * Service Factory.
  * @package froq\service
  * @object  froq\service\ServiceFactory
  * @author  Kerem Güneş <k-gun@mail.com>
  * @since   1.0
+ * @static
  */
-final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
+final class ServiceFactory
 {
     /**
      * Create.
-     * @param  froq\App $app
-     * @return ?froq\service\Service
+     * @param  froq\app\App $app
+     * @return froq\service\ServiceInterface
      * @throws froq\service\ServiceException
      */
-    public static final function create(App $app): ?Service
+    public static function create(App $app): ServiceInterface
     {
         $request = $app->request();
-        $response = $app->response();
-        $requestUri = $request->uri();
-        $requestMethod = $request->method();
 
-        // detect service name if provided
         $service = null;
-        $serviceName = $serviceNameOrig = strtolower($requestUri->segment(1, ''));
+        $serviceName = strtolower($request->uri()->segment(1, ''));
+        $serviceNameOrig = $serviceName;
         $serviceNameAlias = '';
         $serviceMethod = null;
         $serviceMethodFilter = null;
         $serviceMethodArguments = null;
         $serviceAliases = $app->config('service.aliases');
 
-        // main
+        // Main.
         if ($serviceName == '') {
-            $serviceName = Service::SERVICE_MAIN;
+            $serviceName = ServiceInterface::SERVICE_MAIN;
         } else {
             $serviceName = self::toServiceName($serviceName);
             $serviceFile = self::toServiceFile($serviceName);
             $serviceClass = self::toServiceClass($serviceName);
 
             if (!self::isServiceExists($serviceFile, $serviceClass)) {
-                // check aliases
+                // Check aliases.
                 if (isset($serviceAliases[$serviceNameOrig][0])) {
                     $serviceNameAlias = $serviceNameOrig;
-                    // 0 => name, methods => ...
+                    // 0 => name, methods => ....
                     $serviceName = $serviceAliases[$serviceNameAlias][0];
-                    // 0 => name, method => ... if given for one invoke direction
+                    // 0 => name, method => ... if given for one invoke direction.
                     $serviceMethod = $serviceAliases[$serviceNameAlias]['method'] ?? null;
-                    // 0 => name, method => ..., methodFilter => ... if given for one invoke direction filter
+                    // 0 => name, method => ..., methodFilter => ... if given for one invoke direction filter.
                     $serviceMethodFilter = $serviceAliases[$serviceNameAlias]['methodFilter'] ?? null;
                 }
-                // check regexp routes
+                // Check regexp routes.
                 else if (isset($serviceAliases['~~'])) {
-                    $uriPath = $requestUri->get('path');
+                    $uriPath = $request->uri()->get('path');
                     foreach ((array) $serviceAliases['~~'] as $route) {
-                        // these are required
                         if (empty($route['method']) || empty($route['pattern'])) {
-                            throw new ServiceException("Both 'method' and 'pattern' are required for RegExp aliases");
+                            throw new ServiceException('Both method and pattern are required for '.
+                                'RegExp aliases');
                         }
 
                         if (preg_match($route['pattern'], $uriPath, $match)) {
@@ -98,9 +98,10 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
                 }
             }
 
-            // if real names disabled
+            // If real names disabled dump $serviceName, so that couse 404 error.
             $allowRealName = $app->config('service.allowRealName');
-            if (!$allowRealName && $serviceNameAlias != '' && self::isServiceExists($serviceFile, $serviceClass)) {
+            if (!$allowRealName && $serviceNameAlias != ''
+                && self::isServiceExists($serviceFile, $serviceClass)) {
                 $serviceName = '';
             }
         }
@@ -109,85 +110,76 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
         $serviceFile = self::toServiceFile($serviceName);
         $serviceClass = self::toServiceClass($serviceName);
 
-        // set service as FailService
+        // Set service as FailService if no exists.
         if (!self::isServiceExists($serviceFile, $serviceClass)) {
-            set_global('app.service.fail', [
-                'code' => 404,
-                'text' => sprintf('Service not found [%s]', $serviceName),
-            ]);
+            // Save info stack.
+            app_fail('service', ['code' => 404, 'text' => sprintf('Service not found [%s]',
+                $serviceName)]);
 
-            // set response status
-            $response->setStatus(404);
-
-            $serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
-            $serviceMethod = Service::METHOD_MAIN;
+            $serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
+            $serviceMethod = ServiceInterface::METHOD_MAIN;
             $serviceFile   = self::toServiceFile($serviceName);
             $serviceClass  = self::toServiceClass($serviceName);
         }
 
         $service = new $serviceClass($app, $serviceName, $serviceMethod);
 
-        // detect and set service method
+        // Detect and set service method if service exists.
         if (!$service->isFailService()) {
-            if ($serviceMethod != '') { // pass
-                // @note: method could be checked in main() [if $useMainOnly=true in service]
-                // @note: this will override $useMainOnly option in service
+            if ($serviceMethod != '') {
+                // Pass, so method could be checked in main() [if $useMainOnly=true in service]
+                // this will override $useMainOnly option property in service.
             } elseif ($service->usesMainOnly()) {
-                // main only
-                $serviceMethod = Service::METHOD_MAIN;
+                // Main only triggered if $useMainOnly=true in service.
+                $serviceMethod = ServiceInterface::METHOD_MAIN;
+            } elseif ($service->isRest()) {
+                // From request method.
+                $serviceMethod = strtolower($request->method()->getName());
             } elseif ($service->isSite()) {
-                // from segment
+                // From segment.
                 if ($serviceMethod == '') {
-                    $serviceMethod = strtolower($requestUri->segment(2, ''));
+                    $serviceMethod = strtolower($request->uri()->segment(2, ''));
                 }
 
-                // alias
                 if (isset($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod])) {
-                    $serviceMethod = self::toServiceMethod($serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
-                } elseif ($serviceMethod == '' || $serviceMethod == Service::METHOD_MAIN) {
-                    // main
-                    $serviceMethod = Service::METHOD_MAIN;
+                    // Aliases can detect and change service method.
+                    $serviceMethod = self::toServiceMethod(
+                        $serviceAliases[$serviceNameAlias]['methods'][$serviceMethod]);
+                } elseif ($serviceMethod == '' || $serviceMethod == ServiceInterface::METHOD_MAIN) {
+                    $serviceMethod = ServiceInterface::METHOD_MAIN;
                 } else {
                     $serviceMethod = self::toServiceMethod($serviceMethod);
                 }
-            } elseif ($service->isRest()) {
-                // from request method
-                $serviceMethod = strtolower($requestMethod->getName());
             }
 
-            // check method
+            // Check method and set it as <service>.fail() or FailService.main().
             if (!self::isServiceMethodExists($service, $serviceMethod)) {
-                // check fallback method
-                if (self::isServiceFallMethodExists($service)) {
-                    $serviceMethod = Service::METHOD_FALL;
+                if (self::isServiceMethodExists($service, ServiceInterface::METHOD_FAIL)) {
+                    $serviceMethod = ServiceInterface::METHOD_FAIL;
                 } else {
-                    set_global('app.service.fail', [
-                        'code' => 404,
-                        'text' => sprintf('Service method not found [%s::%s()]', $serviceName, $serviceMethod)
-                    ]);
+                    // Save info stack.
+                    app_fail('service', ['code' => 404, 'text' => sprintf('Service method not '.
+                        'found [%s::%s()]', $serviceName, $serviceMethod)]);
 
-                    // set response status
-                    $response->setStatus(404);
-
-                    // override
-                    $serviceName   = Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX;
-                    $serviceMethod = Service::METHOD_MAIN;
+                    // @override
+                    $serviceName   = ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX;
+                    $serviceMethod = ServiceInterface::METHOD_MAIN;
                     $serviceFile   = self::toServiceFile($serviceName);
                     $serviceClass  = self::toServiceClass($serviceName);
 
-                    // re-create service as FailService
+                    // Re-create service as FailService.
                     $service = new $serviceClass($app, $serviceName, $serviceMethod);
                 }
             }
 
             $service->setMethod($serviceMethod);
 
-            // set service method arguments
+            // Set service method arguments.
             if (self::isServiceMethodExists($service, $serviceMethod)) {
-                $serviceMethodArguments = isset($serviceMethodArguments) ? $serviceMethodArguments
-                    : $requestUri->segmentArguments($service->isSite() ? 2 : 1);
+                $serviceMethodArguments = $serviceMethodArguments
+                    ?? $request->uri()->segmentArguments($service->isRest() ? 1 : 2);
 
-                $ref = new \ReflectionMethod($serviceClass, $serviceMethod);
+                $ref = new ReflectionMethod($serviceClass, $serviceMethod);
                 foreach ($ref->getParameters() as $i => $param) {
                     if (!isset($serviceMethodArguments[$i])) {
                         $serviceMethodArguments[$i] = $param->isDefaultValueAvailable()
@@ -197,7 +189,7 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
 
                 $service->setMethodArguments($serviceMethod, $serviceMethodArguments);
 
-                // method filter
+                // Apply method filter if provided in service aliases.
                 if ($serviceMethodFilter != null) {
                     $serviceMethodFilter->call($service);
                 }
@@ -212,36 +204,33 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      * @param  string $serviceName
      * @return string
      */
-    public static final function toServiceName(string $serviceName): string
+    public static function toServiceName(string $serviceName): string
     {
-        // foo-bar => FooBar
-        $serviceName = ucfirst($serviceName);
-        if (strpos($serviceName, '-')) {
-            $serviceName = preg_replace_callback('~-([a-z])~i', function($match) {
-                return ucfirst($match[1]);
-            }, $serviceName);
-        }
+        $serviceName = $this->prepareName($serviceName);
 
         // foo-bar => FooBarService
-        if ($serviceName == Service::SERVICE_NAME_SUFFIX || substr($serviceName, -7) != Service::SERVICE_NAME_SUFFIX) {
-            $serviceName .= Service::SERVICE_NAME_SUFFIX;
+        if ($serviceName == ServiceInterface::SERVICE_NAME_SUFFIX
+            || substr($serviceName, -7) != ServiceInterface::SERVICE_NAME_SUFFIX) {
+            $serviceName .= ServiceInterface::SERVICE_NAME_SUFFIX;
         }
 
         return $serviceName;
     }
 
     /**
-     * To service name.
+     * To service file.
      * @param  string $serviceName
      * @return string
      */
-    public static final function toServiceFile(string $serviceName): string
+    public static function toServiceFile(string $serviceName): string
     {
         $serviceFile = sprintf('%s/app/service/%s/%s.php', APP_DIR, $serviceName, $serviceName);
         if (!file_exists($serviceFile) && (
-            $serviceName == (Service::SERVICE_MAIN . Service::SERVICE_NAME_SUFFIX)
-                || $serviceName == (Service::SERVICE_FAIL . Service::SERVICE_NAME_SUFFIX))) {
-            $serviceFile = sprintf('%s/app/service/_default/%s/%s.php', APP_DIR, $serviceName, $serviceName);
+               $serviceName == (ServiceInterface::SERVICE_MAIN . ServiceInterface::SERVICE_NAME_SUFFIX)
+            || $serviceName == (ServiceInterface::SERVICE_FAIL . ServiceInterface::SERVICE_NAME_SUFFIX)
+        )) {
+            $serviceFile = sprintf('%s/app/service/_default/%s/%s.php', APP_DIR, $serviceName,
+                $serviceName);
         }
 
         return $serviceFile;
@@ -252,9 +241,9 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      * @param  string $serviceName
      * @return string
      */
-    public static final function toServiceClass(string $serviceName): string
+    public static function toServiceClass(string $serviceName): string
     {
-        return sprintf('%s\\%s', Service::NAMESPACE, $serviceName);
+        return sprintf('%s\%s', ServiceInterface::NAMESPACE, $serviceName);
     }
 
     /**
@@ -262,18 +251,12 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      * @param  string $serviceMethod
      * @return string
      */
-    public static final function toServiceMethod(string $serviceMethod): string
+    public static function toServiceMethod(string $serviceMethod): string
     {
-        // foo-bar => FooBar
-        $serviceMethod = ucfirst($serviceMethod);
-        if (strpos($serviceMethod, '-')) {
-            $serviceMethod = preg_replace_callback('~-([a-z])~i', function($match) {
-                return ucfirst($match[1]);
-            }, $serviceMethod);
-        }
+        $serviceMethod = $this->prepareName($serviceMethod);
 
         // foo-bar => doFooBar
-        return sprintf('%s%s', Service::METHOD_NAME_PREFIX, $serviceMethod);
+        return sprintf('%s%s', ServiceInterface::METHOD_NAME_PREFIX, $serviceMethod);
     }
 
     /**
@@ -281,34 +264,43 @@ final /* static final fuck fuck fuuuuuuuuuuck!!! */ class ServiceFactory
      * @param  string $serviceFile
      * @param  string $serviceClass
      * @return bool
+     * @internal
      */
-    private static final function isServiceExists(string $serviceFile, string $serviceClass): bool
+    private static function isServiceExists(string $serviceFile, string $serviceClass): bool
     {
-        if (!file_exists($serviceFile)) {
-            return false;
-        }
-
-        return class_exists($serviceClass, true);
+        return file_exists($serviceFile) && class_exists($serviceClass, true);
     }
 
     /**
      * Is service method exists.
-     * @param  froq\service\Service $service
-     * @param  string               $serviceMethod
+     * @param  froq\service\ServiceInterface $service
+     * @param  string                        $serviceMethod
      * @return bool
+     * @internal
      */
-    private static final function isServiceMethodExists(?Service $service, string $serviceMethod): bool
+    private static function isServiceMethodExists(ServiceInterface $service, string $serviceMethod): bool
     {
-        return $service && method_exists($service, $serviceMethod);
+        return method_exists($service, $serviceMethod);
     }
 
     /**
-     * Is service fall method exists.
-     * @param  froq\service\Service $service
-     * @return bool
+     * Prepare name.
+     * @param  string $name
+     * @return string
+     * @since  4.0
+     * @internal
      */
-    private static final function isServiceFallMethodExists(?Service $service): bool
+    private function prepareName(string $name): string
     {
-        return $service && method_exists($service, Service::METHOD_FALL);
+        $name = ucfirst($name);
+
+        // foo-bar => FooBar
+        if (strpos($name, '-')) {
+            $name = preg_replace_callback('~-([a-z])~i', function($match) {
+                return ucfirst($match[1]);
+            }, $name);
+        }
+
+        return $name;
     }
 }
